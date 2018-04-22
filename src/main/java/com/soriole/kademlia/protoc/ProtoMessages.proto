@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+package message;
+
+option java_package = "com.soriole.kademlia.protoc";
+option java_outer_classname = "ProtoMessage";
+
+message Message {
+    // Message type
+    enum messageType {
+        Client2P = 0;
+        P2P = 1;
+        P2Client = 2;
+        }
+
+    // Message fields
+    required bytes uidSender = 2;
+    required bytes uidReceiver = 3;
+    required bytes sessionKey = 4;
+    optional bytes messageByte=5;
+    required bytes mac = 6;
+}

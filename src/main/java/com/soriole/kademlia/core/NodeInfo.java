@@ -2,6 +2,8 @@ package com.soriole.kademlia.core;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Pair of {@link Key} and associated socket address of a node.
@@ -14,6 +16,8 @@ public class NodeInfo implements Serializable {
     private final Key mKey;
     private final InetSocketAddress mLanAddress;
     private final InetSocketAddress mWanAddress;
+    private List<Key> mSubscribedList = new ArrayList<Key>();
+
 
     public NodeInfo(Key key) {
         mKey = key;
@@ -77,9 +81,9 @@ public class NodeInfo implements Serializable {
         return mLanAddress;
     }
 
-    public InetSocketAddress getWanAddress() {
-        return mWanAddress;
-    }
+    public InetSocketAddress getWanAddress() { return mWanAddress; }
+
+    public List<Key> getSubscribedList() {return mSubscribedList; }
 
     @Override
     public int hashCode() {
