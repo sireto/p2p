@@ -1,6 +1,7 @@
 package com.soriole.kademlia.core;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Peer in Kademlia's network.
@@ -57,4 +58,10 @@ public interface KademliaRouting {
    * @throws KademliaException
    */
   void stop() throws KademliaException;
+
+  Map<byte[], Integer> fetch(Key key, int availability)throws InterruptedException ;
+  int store(Key key, byte[] value, int availability);
+  int store(Key key, byte[] value);
+  byte[] fetchLocally(Key key);
+  void storeLocally(Key key, byte[] value);
 }

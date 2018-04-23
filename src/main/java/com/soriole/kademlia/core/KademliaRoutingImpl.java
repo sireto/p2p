@@ -2,9 +2,9 @@ package com.soriole.kademlia.core;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.soriole.kademlia.network.NetworkAddressDiscovery;
+import com.soriole.kademlia.service.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -53,6 +53,9 @@ class KademliaRoutingImpl implements KademliaRouting {
     private boolean mIsRunning = false;
     private ScheduledFuture<?> mRefreshFuture = null;
 
+    // storage service
+    private StorageService mStorageService;
+
     KademliaRoutingImpl(NodeInfo localNodeInfo,
                         MessageSender sender,
                         ListeningService listeningService,
@@ -63,6 +66,7 @@ class KademliaRoutingImpl implements KademliaRouting {
                         int entryRefreshDelay,
                         Collection<InetSocketAddress> initialPeerAddresses,
                         Collection<NodeInfo> initialKnownPeers,
+                        StorageService storageService,
                         Random random) {
         assert bucketSize > 0;
         mRandom = random;
@@ -89,6 +93,9 @@ class KademliaRoutingImpl implements KademliaRouting {
         ReadWriteLock rwLock = new ReentrantReadWriteLock();
         mReadRunningLock = rwLock.readLock();
         mWriteRunningLock = rwLock.writeLock();
+
+        // local storage
+        mStorageService = storageService;
     }
 
     @Override
@@ -123,8 +130,8 @@ class KademliaRoutingImpl implements KademliaRouting {
                 keyInfoMap.put(nodeInfo.getKey(), nodeInfo);
             }
 
-      /* Send up to mAlpha concurrent messages and continue sending until we either get expected
-       * answer or run out of peers to query */
+          /* Send up to mAlpha concurrent messages and continue sending until we either get expected
+           * answer or run out of peers to query */
             int connectionIdx = 0;
             while (connectionIdx < mAlpha && !unqueriedKeys.isEmpty()) {
                 Key closestKey = unqueriedKeys.remove();
@@ -141,19 +148,19 @@ class KademliaRoutingImpl implements KademliaRouting {
                 connectionIdx -= 1;
                 try {
                     FindNodeReplyMessage msg = (FindNodeReplyMessage) future.get();
-          /* Process found nodes */
+                    /* Process found nodes */
                     for (NodeInfo foundNodeInfo : msg.getFoundNodes()) {
                         NodeInfo nodeInfoInMap = keyInfoMap.get(foundNodeInfo.getKey());
                         if (nodeInfoInMap != null && !nodeInfoInMap.getLanAddress().equals(
                                 foundNodeInfo.getLanAddress())) {
-              /* Ignore */
+                        /* Ignore */
                         } else if (nodeInfoInMap == null) {
                             unqueriedKeys.add(foundNodeInfo.getKey());
                             keyInfoMap.put(foundNodeInfo.getKey(), foundNodeInfo);
                         }
                     }
 
-          /* add source key to candidates */
+                    /* add source key to candidates */
                     Key sourceKey = msg.getSourceNodeInfo().getKey();
                     LOGGER.trace("findClosestNodes() -> candidateKeys.add({})", sourceKey);
                     candidateKeys.add(sourceKey);
@@ -161,8 +168,8 @@ class KademliaRoutingImpl implements KademliaRouting {
                     while (!unqueriedKeys.isEmpty()) {
                         Key newKey = unqueriedKeys.remove();
                         queriedKeys.add(newKey);
-            /* Send new query if we haven't reach expected size or unqueried key may be a
-             * candidate */
+                        /* Send new query if we haven't reach expected size or unqueried key may be a
+                         * candidate */
                         if (candidateKeys.size() < expectedFoundNodesSize
                                 || findKeyComparator.compare(newKey, candidateKeys.last()) < 0) {
                             NodeInfo nodeInfo = keyInfoMap.get(newKey);
@@ -186,6 +193,156 @@ class KademliaRoutingImpl implements KademliaRouting {
             closestFoundNodeInfos.addAll(keyInfoMap.values());
             LOGGER.debug("findClosestKeys(): {}", closestFoundNodeInfos);
             return closestFoundNodeInfos;
+        } finally {
+            mReadRunningLock.unlock();
+        }
+    }
+
+
+    public void storeLocally(Key key, byte[] value) {
+        mStorageService.write(key.toString(), value);
+    }
+
+    public byte[] fetchLocally(Key key) {
+        return mStorageService.read(key.toString());
+    }
+
+    public int store(Key key, byte[] value) {
+        return store(key, value, mBucketSize);
+    }
+
+    public int store(Key key, byte[] value, int availability) {
+        int storeCounter = 0;
+        try {
+            Collection<NodeInfo> closestNodes = findClosestNodes(key, availability);
+
+            BlockingQueue<Future<Message>> replyQueue = new LinkedBlockingQueue<>();
+            MessageResponseHandler responseHandler = new QueuedMessageResponseHandler(replyQueue);
+
+            closestNodes.stream().forEach(nodeInfo -> {
+                mMessageSender.sendMessageWithReply(nodeInfo.getLanAddress(),
+                        new StoreMessage(getLocalNodeInfo(), nodeInfo, key, value), responseHandler);
+            });
+
+            int counter = closestNodes.size();
+            while (counter > 0) {
+                Future<Message> future = replyQueue.take();
+                counter -= 1;
+                try {
+                    StoreReplyMessage msg = (StoreReplyMessage) future.get();
+                    if (msg.isSuccess()) {
+                        storeCounter++;
+                    }
+                } catch (ExecutionException e) {
+                    LOGGER.error("Expected a store reply message but could not process response", e);
+                }
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("Could not store key {}", key, e);
+        }
+        return storeCounter;
+    }
+
+    @Override
+    public Map<byte[], Integer> fetch(Key key, int availability)  throws
+            InterruptedException {
+        final KeyComparator findKeyComparator = new KeyComparator(key);
+        LOGGER.debug("fetch({}, {})", key.toString(), availability);
+        mReadRunningLock.lock();
+        Map<byte[], Integer> fetchResult = new HashMap<>();
+        try {
+            if (!mIsRunning) {
+                throw new IllegalStateException("Called fetch() on nonrunning kademlia.");
+            }
+            Map<Key, NodeInfo> keyInfoMap = new HashMap<>();
+            Set<Key> queriedKeys = new HashSet<>();
+            PriorityQueue<Key> unqueriedKeys = new PriorityQueue<>(mBucketSize, findKeyComparator);
+            SortedSet<Key> candidateKeys = new BoundedSortedSet<>(new TreeSet<>(findKeyComparator),
+                    mBucketSize);
+
+            BlockingQueue<Future<Message>> replyQueue = new LinkedBlockingQueue<>();
+            MessageResponseHandler responseHandler = new QueuedMessageResponseHandler(replyQueue);
+
+            Collection<NodeInfo> closestNodes = getClosestRoutingTableNodes(
+                    key, Math.max(mAlpha, mBucketSize));
+
+            for (NodeInfo nodeInfo : closestNodes) {
+                unqueriedKeys.add(nodeInfo.getKey());
+                keyInfoMap.put(nodeInfo.getKey(), nodeInfo);
+            }
+
+          /* Send up to mAlpha concurrent messages and continue sending until we either get expected
+           * answer or run out of peers to query */
+            int connectionIdx = 0;
+            while (connectionIdx < mAlpha && !unqueriedKeys.isEmpty()) {
+                Key closestKey = unqueriedKeys.remove();
+                NodeInfo nodeInfo = keyInfoMap.get(closestKey);
+
+                queriedKeys.add(closestKey);
+                mMessageSender.sendMessageWithReply(nodeInfo.getLanAddress(), new FetchMessage(
+                        getLocalNodeInfo(), nodeInfo, key), responseHandler);
+                connectionIdx += 1;
+            }
+
+            while (connectionIdx > 0) {
+                Future<Message> future = replyQueue.take();
+                connectionIdx -= 1;
+                try {
+                    Message message = future.get();
+                    if (message instanceof DataMessage) {
+                        DataMessage msg = (DataMessage) message;
+                        if(msg.getKey().equals(key)){
+                            byte[] value = msg.getValue();
+                            if(fetchResult.containsKey(value)){
+                                fetchResult.put(value, fetchResult.get(value)+1);
+                            }else{
+                                fetchResult.put(value, 1);
+                            }
+                        }
+                    } else if (message instanceof FindNodeReplyMessage) {
+
+                        FindNodeReplyMessage msg = (FindNodeReplyMessage) future.get();
+                        /* Process found nodes */
+                        for (NodeInfo foundNodeInfo : msg.getFoundNodes()) {
+                            NodeInfo nodeInfoInMap = keyInfoMap.get(foundNodeInfo.getKey());
+                            if (nodeInfoInMap != null && !nodeInfoInMap.getLanAddress().equals(
+                                    foundNodeInfo.getLanAddress())) {
+                            /* Ignore */
+                            } else if (nodeInfoInMap == null) {
+                                unqueriedKeys.add(foundNodeInfo.getKey());
+                                keyInfoMap.put(foundNodeInfo.getKey(), foundNodeInfo);
+                            }
+                        }
+
+                        /* add source key to candidates */
+                        Key sourceKey = msg.getSourceNodeInfo().getKey();
+                        LOGGER.trace("findClosestNodes() -> candidateKeys.add({})", sourceKey);
+                        candidateKeys.add(sourceKey);
+
+                        while (!unqueriedKeys.isEmpty()) {
+                            Key newKey = unqueriedKeys.remove();
+                            queriedKeys.add(newKey);
+                            /* Send new query if we haven't reach expected size or unqueried key may be a
+                             * candidate */
+                            if (candidateKeys.size() < mBucketSize
+                                    || findKeyComparator.compare(newKey, candidateKeys.last()) < 0) {
+                                NodeInfo nodeInfo = keyInfoMap.get(newKey);
+                                mMessageSender.sendMessageWithReply(nodeInfo.getLanAddress(), new FetchMessage(
+                                        getLocalNodeInfo(), nodeInfo, key), responseHandler);
+                                connectionIdx += 1;
+                            }
+                        }
+                    }
+                } catch (ExecutionException e) {
+                    LOGGER.debug( String.format("findClosestKeys(%s) -> exception when sending a message.",
+                                    key.toString()), e);
+                } catch (ClassCastException e) {
+                    LOGGER.warn( String.format("findClosestKeys(%s) -> received message of wrong type.",
+                                    key.toString()), e);
+                }
+            }
+            LOGGER.debug("findValues(): {}", fetchResult);
+            return fetchResult;
         } finally {
             mReadRunningLock.unlock();
         }
@@ -221,7 +378,7 @@ class KademliaRoutingImpl implements KademliaRouting {
                 throw new IllegalStateException("Kademlia has already started.");
             }
 
-      /* Connect to initial peers */
+            /* Connect to initial peers */
             clearBuckets();
             LOGGER.trace("startUp() -> addPeersToBuckets");
             addPeersToBuckets(mInitialKnownPeers);
@@ -457,6 +614,24 @@ class KademliaRoutingImpl implements KademliaRouting {
         public PongMessage receiveGetKeyMessage(GetKeyMessage msg) {
             processSenderNodeInfo(msg.getSourceNodeInfo());
             return new PongMessage(getLocalNodeInfo(), msg.getSourceNodeInfo());
+        }
+
+        @Override
+        public StoreReplyMessage receiveStoreMessage(StoreMessage msg) {
+            mStorageService.write(msg.getKey().toString(), msg.getValue());
+            return new StoreReplyMessage(getLocalNodeInfo(), msg.getSourceNodeInfo(), true);
+        }
+
+        @Override
+        public Message receiveFetchMessage(FetchMessage msg) {
+            byte[] value = mStorageService.read(msg.getKey().toString());
+            if(value == null || value.length==0){
+                processSenderNodeInfo(msg.getSourceNodeInfo());
+                return new FindNodeReplyMessage(getLocalNodeInfo(), msg.getSourceNodeInfo(),
+                        getClosestRoutingTableNodes(msg.getKey(), mBucketSize));
+            }else{
+                return new DataMessage(getLocalNodeInfo(), msg.getSourceNodeInfo(), msg.getKey(), value);
+            }
         }
 
         @Override

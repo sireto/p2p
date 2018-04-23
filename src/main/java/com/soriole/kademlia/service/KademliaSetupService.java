@@ -8,6 +8,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,9 @@ public class KademliaSetupService {
     @Value("${kademlia.bucket.size}")
     public int bucketSize;
 
+    @Autowired
+    StorageService storageService;
+
     public KademliaRouting kademlia;
 
     @PostConstruct
@@ -83,27 +87,9 @@ public class KademliaSetupService {
         builder.setBucketSize(bucketSize);
         builder.setNetworkAddressDiscovery(new UserGivenNetworkAddressDiscovery(new InetSocketAddress(
                 localInetAddress, localPort)));
+        builder.setStorageService(storageService);
 
         kademlia = builder.createPeer();
 
-//        if (kademlia.isRunning()) {
-//            try {
-//                kademlia.stop();
-//            } catch (KademliaException e) {
-//                LOGGER.error("main(): kademlia.stop()", e);
-//            }
-//        }
-//        ssbls.stop();
-//        try {
-//            LOGGER.debug("main(): executor.shutdown()");
-//            executor.shutdown();
-//            executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
-//            LOGGER.debug("main(): scheduledExecutor.shutdown()");
-//            scheduledExecutor.shutdown();
-//            scheduledExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
-//        } catch (InterruptedException e) {
-//            LOGGER.error("main() -> unexpected interrupt", e);
-//        }
-//        LOGGER.info("main() -> void");
     }
 }

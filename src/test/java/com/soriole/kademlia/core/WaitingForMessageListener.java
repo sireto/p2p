@@ -21,6 +21,18 @@ public class WaitingForMessageListener implements MessageListener {
   }
 
   @Override
+  public StoreReplyMessage receiveStoreMessage(StoreMessage msg) {
+    checkWaiting(msg);
+    return null;
+  }
+
+  @Override
+  public Message receiveFetchMessage(FetchMessage msg) {
+    checkWaiting(msg);
+    return null;
+  }
+
+  @Override
   public synchronized PongMessage receivePingMessage(PingMessage msg) {
     checkWaiting(msg);
     return null;

@@ -24,4 +24,9 @@ interface MessageListener {
    *         happened.
    */
   PongMessage receiveGetKeyMessage(GetKeyMessage msg);
+
+  StoreReplyMessage receiveStoreMessage(StoreMessage msg);
+
+  Message receiveFetchMessage(FetchMessage msg);
+
 }

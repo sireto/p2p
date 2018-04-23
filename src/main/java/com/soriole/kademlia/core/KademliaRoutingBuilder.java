@@ -4,6 +4,7 @@ import com.soriole.kademlia.network.ByteListener;
 import com.soriole.kademlia.network.ByteListeningService;
 import com.soriole.kademlia.network.ByteSender;
 import com.soriole.kademlia.network.NetworkAddressDiscovery;
+import com.soriole.kademlia.service.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,9 @@ public class KademliaRoutingBuilder {
   private Collection<NodeInfo> mInitialPeersWithKeys = new LinkedList<>();
   private int mEntryRefreshDelay = DEFAULT_ENTRY_REFRESH_DELAY;
 
+  // storage service
+  private StorageService mStorageService;
+
   public KademliaRoutingBuilder(Random random) {
     mRandom = random;
   }
@@ -72,7 +76,7 @@ public class KademliaRoutingBuilder {
     LOGGER.debug("createPeer() -> Key: {}", usedKey);
     return new KademliaRoutingImpl(localNodeInfo, mMessageSender, listeningService,
         mNetAddrDiscovery, mExecutor, mBucketSize, mAlpha, mEntryRefreshDelay,
-        mInitialPeersWithoutKeys, mInitialPeersWithKeys, mRandom);
+        mInitialPeersWithoutKeys, mInitialPeersWithKeys, mStorageService, mRandom);
   }
 
   public KademliaRouting createPeer(int port) throws IllegalStateException {
@@ -91,7 +95,7 @@ public class KademliaRoutingBuilder {
     LOGGER.debug("createPeer() -> Key: {}", usedKey);
     return new KademliaRoutingImpl(localNodeInfo, mMessageSender, listeningService,
             mNetAddrDiscovery, mExecutor, mBucketSize, mAlpha, mEntryRefreshDelay,
-            mInitialPeersWithoutKeys, mInitialPeersWithKeys, mRandom);
+            mInitialPeersWithoutKeys, mInitialPeersWithKeys, mStorageService, mRandom);
   }
 
   /**
@@ -192,6 +196,10 @@ public class KademliaRoutingBuilder {
     return this;
   }
 
+  public void setStorageService(StorageService storageService){
+    mStorageService = storageService;
+  }
+
   /**
    * @param netAddrDisc
    * @return this
@@ -285,6 +293,34 @@ public class KademliaRoutingBuilder {
         }
         MessageListener listener = mListenerMap.values().iterator().next();
         return listener.receiveGetKeyMessage(msg);
+      } finally {
+        mReadLock.unlock();
+      }
+    }
+
+    @Override
+    public StoreReplyMessage receiveStoreMessage(StoreMessage msg) {
+      mReadLock.lock();
+      try {
+        MessageListener listener = getRecipient(msg);
+        if (listener == null) {
+          return null;
+        }
+        return listener.receiveStoreMessage(msg);
+      } finally {
+        mReadLock.unlock();
+      }
+    }
+
+    @Override
+    public Message receiveFetchMessage(FetchMessage msg) {
+      mReadLock.lock();
+      try {
+        MessageListener listener = getRecipient(msg);
+        if (listener == null) {
+          return null;
+        }
+        return listener.receiveFetchMessage(msg);
       } finally {
         mReadLock.unlock();
       }

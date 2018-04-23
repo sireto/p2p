@@ -144,7 +144,32 @@ class StaticKademliaRoutingImpl implements KademliaRouting {
     LOGGER.info("stop(): void");
   }
 
-  /**
+    @Override
+    public Map<byte[], Integer> fetch(Key key, int availability) throws InterruptedException {
+        return null;
+    }
+
+    @Override
+    public int store(Key key, byte[] value, int availability) {
+        return 0;
+    }
+
+    @Override
+    public int store(Key key, byte[] value) {
+        return 0;
+    }
+
+    @Override
+    public byte[] fetchLocally(Key key) {
+        return new byte[0];
+    }
+
+    @Override
+    public void storeLocally(Key key, byte[] value) {
+
+    }
+
+    /**
    * Comparator of BitSets representing a 160-bit number in a little-endian
    * encoding.
    *
@@ -283,6 +308,27 @@ class StaticKademliaRoutingImpl implements KademliaRouting {
         }
       }
       return new PongMessage(getLocalNodeInfo(), msg.getSourceNodeInfo());
+    }
+
+    @Override
+    public StoreReplyMessage receiveStoreMessage(StoreMessage msg) {
+      synchronized (StaticKademliaRoutingImpl.this) {
+        if (mAuxListener != null) {
+          mAuxListener.receiveStoreMessage(msg);
+        }
+      }
+      return new StoreReplyMessage(getLocalNodeInfo(), msg.getSourceNodeInfo(), true);
+    }
+
+    @Override
+    public Message receiveFetchMessage(FetchMessage msg) {
+      synchronized (StaticKademliaRoutingImpl.this) {
+        if (mAuxListener != null) {
+          mAuxListener.receiveFetchMessage(msg);
+        }
+      }
+      return new FindNodeReplyMessage(getLocalNodeInfo(), msg.getSourceNodeInfo(),
+              getClosestRoutingTableNodes(msg.getKey(), mBucketSize));
     }
 
     @Override

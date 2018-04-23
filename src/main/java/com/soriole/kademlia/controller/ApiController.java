@@ -10,11 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.websocket.server.PathParam;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/api/v1")
@@ -73,7 +76,7 @@ public class ApiController {
     }
 
     @GetMapping(value = "/find_nodes/{key}")
-    public NodeInfoCollectionBean findNodes(@PathParam("key") String paramKey) {
+    public NodeInfoCollectionBean findNodes(@PathVariable("key") String paramKey) {
         LOGGER.info("findNodes({})", paramKey);
         Key key = new Key(Integer.parseInt(paramKey));
         Collection<NodeInfo> nodeInfos = null;
@@ -97,5 +100,28 @@ public class ApiController {
     @GetMapping(value = "/key")
     public String getKey() {
         return kademliaSetupService.kademlia.getLocalKey().toString();
+    }
+
+    @GetMapping(value = "/store/{key}")
+    public int store(@PathVariable("key") String paramKey, @PathParam("value") String value){
+        Key key = new Key(Integer.parseInt(paramKey));
+        return kademliaSetupService.kademlia.store(key, value.getBytes());
+    }
+
+    @GetMapping(value = "/fetch/{key}")
+    public Map<byte[], Integer> fetch(@PathVariable("key") String paramKey){
+        Key key = new Key(Integer.parseInt(paramKey));
+        try {
+            return kademliaSetupService.kademlia.fetch(key, 1);
+        } catch (InterruptedException e) {
+            LOGGER.error("Could not fetch key {}", key, e);
+        }
+        return new HashMap<>();
+    }
+
+    @GetMapping(value = "/local/{key}")
+    public String local(@PathVariable("key") String paramKey){
+        Key key = new Key(Integer.parseInt(paramKey));
+        return new String(kademliaSetupService.kademlia.fetchLocally(key));
     }
 }

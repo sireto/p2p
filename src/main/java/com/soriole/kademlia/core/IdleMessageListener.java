@@ -20,4 +20,16 @@ public class IdleMessageListener implements MessageListener {
   public PongMessage receiveGetKeyMessage(GetKeyMessage msg) {
     return null;
   }
+
+  @Override
+  public StoreReplyMessage receiveStoreMessage(StoreMessage msg) {
+    return null;
+  }
+
+  @Override
+  public Message receiveFetchMessage(FetchMessage msg) {
+    return null;
+  }
+
+
 }

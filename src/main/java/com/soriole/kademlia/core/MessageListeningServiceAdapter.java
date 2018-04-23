@@ -49,7 +49,11 @@ class MessageListeningServiceAdapter implements ListeningService {
         response = mListener.receiveGetKeyMessage((GetKeyMessage) msg);
       } else if (msg instanceof PingMessage) {
         response = mListener.receivePingMessage((PingMessage) msg);
-      } else {
+      } else if (msg instanceof StoreMessage) {
+        response = mListener.receiveStoreMessage((StoreMessage) msg);
+      } else if (msg instanceof FetchMessage) {
+        response = mListener.receiveFetchMessage((FetchMessage) msg);
+      }else {
         LOGGER.error("receiveByteArrayWithResponse() -> received unexpected type");
       }
       if (response == null) {
