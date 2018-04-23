@@ -1,5 +1,7 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.message.Message;
+
 import java.io.IOException;
 
 final class WaitingMessageResponseHandler implements MessageResponseHandler {

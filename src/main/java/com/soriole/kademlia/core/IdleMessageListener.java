@@ -1,5 +1,7 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.message.*;
+
 /**
  * {@link MessageListener} which does nothing and does not respond.
  *

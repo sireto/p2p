@@ -1,5 +1,7 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.message.Message;
+
 import java.net.InetSocketAddress;
 
 interface MessageSender {

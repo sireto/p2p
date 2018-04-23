@@ -1,5 +1,6 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.message.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

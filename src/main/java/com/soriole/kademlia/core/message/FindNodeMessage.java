@@ -1,6 +1,9 @@
-package com.soriole.kademlia.core;
+package com.soriole.kademlia.core.message;
 
-class FindNodeMessage extends MessageWithKnownRecipient {
+import com.soriole.kademlia.core.Key;
+import com.soriole.kademlia.core.NodeInfo;
+
+public class FindNodeMessage extends MessageWithKnownRecipient {
   private static final long serialVersionUID = 1L;
 
   private final Key mKey;

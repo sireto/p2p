@@ -1,6 +1,7 @@
 package com.soriole.kademlia.core;
 
 import com.google.common.util.concurrent.SettableFuture;
+import com.soriole.kademlia.core.message.*;
 import com.soriole.kademlia.network.NetworkAddressDiscovery;
 import com.soriole.kademlia.service.StorageService;
 import org.slf4j.Logger;

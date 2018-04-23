@@ -1,6 +1,8 @@
-package com.soriole.kademlia.core;
+package com.soriole.kademlia.core.message;
 
-class PingMessage extends MessageWithKnownRecipient {
+import com.soriole.kademlia.core.NodeInfo;
+
+public class PingMessage extends MessageWithKnownRecipient {
   private static final long serialVersionUID = 1L;
 
   public PingMessage(NodeInfo srcNodeInfo, NodeInfo destNodeInfo) {

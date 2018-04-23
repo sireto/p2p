@@ -1,5 +1,7 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.message.*;
+
 public class WaitingForMessageListener implements MessageListener {
   private Message mMsg;
   private boolean mIsWaiting = false;

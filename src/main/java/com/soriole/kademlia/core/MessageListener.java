@@ -1,5 +1,7 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.message.*;
+
 interface MessageListener {
   /**
    * Method to be called when a find node message is received.

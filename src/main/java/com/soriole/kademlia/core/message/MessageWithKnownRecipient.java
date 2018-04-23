@@ -1,6 +1,8 @@
-package com.soriole.kademlia.core;
+package com.soriole.kademlia.core.message;
 
-abstract class MessageWithKnownRecipient extends Message {
+import com.soriole.kademlia.core.NodeInfo;
+
+public abstract class MessageWithKnownRecipient extends Message {
   private static final long serialVersionUID = 1L;
 
   private final NodeInfo mDestNodeInfo;

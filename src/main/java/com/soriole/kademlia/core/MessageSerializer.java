@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import com.soriole.kademlia.core.message.*;
 
 /**
  * Serialization utilities for messages using Java's serialization mechanisms.

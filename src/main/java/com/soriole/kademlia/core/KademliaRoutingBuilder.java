@@ -1,5 +1,6 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.message.*;
 import com.soriole.kademlia.network.ByteListener;
 import com.soriole.kademlia.network.ByteListeningService;
 import com.soriole.kademlia.network.ByteSender;

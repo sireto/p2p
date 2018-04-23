@@ -1,5 +1,6 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.message.Message;
 import com.soriole.kademlia.network.ByteResponseHandler;
 import com.soriole.kademlia.network.ByteSender;
 import org.slf4j.Logger;

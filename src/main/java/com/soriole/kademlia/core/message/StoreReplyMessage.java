@@ -1,6 +1,8 @@
-package com.soriole.kademlia.core;
+package com.soriole.kademlia.core.message;
 
-class StoreReplyMessage extends MessageWithKnownRecipient {
+import com.soriole.kademlia.core.NodeInfo;
+
+public class StoreReplyMessage extends MessageWithKnownRecipient {
   private static final long serialVersionUID = 1L;
 
   private final boolean success;
