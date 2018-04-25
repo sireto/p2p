@@ -16,6 +16,8 @@ public class NodeLookupMessageListener extends MessageListener {
     public void onReceive(Message m) throws Exception {
         NodeLookupMessage message = (NodeLookupMessage) m;
         Collection<NodeInfo> nodes = bucket.getClosestNodes(message.lookupKey);
+        // the list will surely contain the sender's nodeInfo. so remove this.
+        nodes.remove(m.mSrcNodeInfo);
         server.replyFor(m, new NodeListMessage(nodes));
     }
 }

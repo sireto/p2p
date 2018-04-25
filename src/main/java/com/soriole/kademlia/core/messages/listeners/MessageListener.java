@@ -5,6 +5,10 @@ import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.network.KademliaMessageServer;
 
 public abstract class MessageListener {
+
+    /** these two values will be filled by the {@link ListenerFactory} before calling {@link #onReceive } so that the listener can use the features of bucket and server.
+     **/
+
     protected KademliaMessageServer server;
     protected ContactBucket bucket;
 

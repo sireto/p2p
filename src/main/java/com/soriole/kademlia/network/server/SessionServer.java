@@ -5,6 +5,9 @@ import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.core.util.BlockingHashTable;
+import com.soriole.kademlia.core.util.BlockingHashTable2;
+import com.soriole.kademlia.core.util.BlockingHashTable3;
+import com.soriole.kademlia.core.util.BlockingHashTable4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,19 +19,19 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 /**
+ *<ol>
+ *     <li>Uses the {@link com.soriole.kademlia.core.messages.Message#sessionId} data  and {@link BlockingHashTable2} to deliver message to correct waiting thread or to a default Listener.</li>
+ *     <li>Note that the SessionServer itself doesn't start a session. So the Session data needs to be filled up from upper layer.</li>
+ *     <li>Doesn't internally use any thread. Thus the The working Threads must be managed by the upper layer</li>
+ * </ol>
  *
- * Uses the sessionID data to deliver message to correct waiting thread or to a default Listener.
- * Note that the SessionServer itself doesn't startAsync a session. So that needs to be done from upper layer.
- *
- * Doesn't internally use any thread. Thus the The concurrency must be managed by the class that implements it.
+ * @author github.com/mesudip
  *
  */
 public  abstract class SessionServer extends MessageServer {
     private static Logger logger= LoggerFactory.getLogger(SessionServer.class);
     // for messages type operations
-    BlockingHashTable<Long, Message> incomingMessageTable=new BlockingHashTable<>(3000);
-
-    Timer timer = new Timer(true);
+    BlockingHashTable4<Long, Message> incomingMessageTable=new BlockingHashTable4<>(3000);
 
     public SessionServer(DatagramSocket socket, ContactBucket bucket){
         super(socket,bucket);
@@ -41,11 +44,16 @@ public  abstract class SessionServer extends MessageServer {
 
 
     protected Message query(Message message) throws TimeoutException, IOException{
+
+        // without this reserve line, the thread could get switched just after the sendMessage()
+        // thus listening thread would receive the message and see no waiting threads.
+        this.incomingMessageTable.reserverForGet(message.sessionId);
         super.sendMessage(message);
         return incomingMessageTable.get(message.sessionId);
     }
 
     protected void listen(){
+        logger.info("Started listening on -> "+socket.getLocalSocketAddress().toString());
         while (true) {
             try {
 
@@ -67,12 +75,10 @@ public  abstract class SessionServer extends MessageServer {
             } catch (Exception e) {
                 logger.warn(e.getClass().getName()+" : "+e.getMessage());
                 StackTraceElement[] traces=e.getStackTrace();
-                for(int i=0;i<5 && i<traces.length;i++) {
+                for(int i=0;i<10 && i<traces.length;i++) {
                     logger.warn(traces[i].toString());
                 }
-
             }
-
         }
     }
     protected void stopListening(){

@@ -23,13 +23,17 @@ import java.util.Arrays;
 /**
  * KademliaMessageServer is able to read the datagram received in a socket and convert them into
  * appropriate message format so that the upper layer can handle it.
+ * The tasks performed by this server are:
+ *  <ol>
+ *      <li>read datagram and from DatagramServer and convert them to subclasses of Message. </li>
+ *      <li>check the sender if it's in kademliaBucket and try to insert it.</li>
+ *      <li>check for the change of network address of the sender and inform it to upper layer.</li>
+ *      <li></li>
+ *
+ *  </ol>
  */
 abstract class MessageServer extends DataGramServer {
     static private Logger logger = LoggerFactory.getLogger(MessageServer.class);
-
-
-    SynchronizedQueue<Message> messages;
-
     protected ContactBucket bucket;
 
     protected MessageServer(DatagramSocket socket, ContactBucket bucket) {
@@ -38,7 +42,7 @@ abstract class MessageServer extends DataGramServer {
     }
 
     protected void sendMessage(Message message) throws IOException {
-        //KademliaNetworkMessageProtocol.Message  messageProto=new KademliaNetworkMessageProtocol.Message.;
+
         if (message.mSrcNodeInfo == null) {
             message.mSrcNodeInfo = bucket.getLocalNode();
         }
@@ -46,7 +50,7 @@ abstract class MessageServer extends DataGramServer {
         KademliaNetworkMessageProtocol.Message.Builder builder = KademliaNetworkMessageProtocol.Message.newBuilder();
         builder.setSender(ByteString.copyFrom(message.mSrcNodeInfo.getKey().toBytes()))
                 .setSessionId(message.sessionId)
-                .setType(((MessageType) message.getClass().getAnnotation(MessageType.class)).type());
+                .setType(message.getClass().getAnnotation(MessageType.class).type());
         if (message.mDestNodeInfo.getKey() != null) {
             builder.setReceiver(ByteString.copyFrom(message.mDestNodeInfo.getKey().toBytes()));
         }
@@ -59,11 +63,16 @@ abstract class MessageServer extends DataGramServer {
         super.sendPacket(packet);
     }
 
-    protected Message receiveMessage() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+    protected Message receiveMessage() throws  IOException {
         DatagramPacket packet = receivePacket();
         byte[] data = Arrays.copyOf(packet.getData(), packet.getLength());
         KademliaNetworkMessageProtocol.Message messageProto = KademliaNetworkMessageProtocol.Message.parseFrom(data);
-        Message message = MessageFactory.createMessage(messageProto.getType());
+        Message message = null;
+        try {
+            message = MessageFactory.createMessage(messageProto.getType());
+        } catch (Exception e){
+            logger.warn("MessageFactory.createMessage failed for type "+String.valueOf(messageProto.getType()));
+        }
 
         // get The sender's identifier key
         Key senderKey = new Key(messageProto.getSender().toByteArray());
@@ -83,11 +92,14 @@ abstract class MessageServer extends DataGramServer {
             message.mDestNodeInfo = bucket.getNode(new Key(messageProto.getReceiver().toByteArray()));
 
             // message not for us and we don't know receiver's address.
-            if (message.mDestNodeInfo == null) {
-                //TODO: Message received for forwarding, but we don't know receiver's address.
+            if (message.mDestNodeInfo!=bucket.getLocalNode()) {
+                onNewForwardMessage(message,message.mDestNodeInfo);
             }
 
-        } else {
+        }
+        // message doesn't have the receiver's information.
+        // so we safely assume that the message is for us.
+        else {
             message.mDestNodeInfo = bucket.getLocalNode();
         }
         // if the message has message data read it too.
@@ -97,17 +109,28 @@ abstract class MessageServer extends DataGramServer {
 
         // Check if the sender is already is in out kademlia bucket.
         NodeInfo bucketNode = bucket.getNode(senderKey);
+        // if this node is not present in the bucket
         if (bucketNode == null) {
-            onNewNodeFound(message.mSrcNodeInfo.clone());
-        } else if (!message.mSrcNodeInfo.getLanAddress().equals(bucketNode.getLanAddress())) {
+            // try to put it into the bucket
+            if (!bucket.putNode(message.mSrcNodeInfo)) {
+                // if we cannot put it into the bucket we need to notify for furthur action
+                onNewNodeFound(message.mSrcNodeInfo.clone());
+            }
+        }
+        // if the contact is already in the kademlia bucket, check if the address is same.
+        // if the address is changed, we might or might need to do some extra tasks.
+        // TODO: may not be appropriate if it's a forwarded message without onion layer.
+        else if (!message.mSrcNodeInfo.getLanAddress().equals(bucketNode.getLanAddress())) {
             onNetworkAddressChange(senderKey, (InetSocketAddress) packet.getSocketAddress());
         }
         return message;
     }
 
-    abstract protected void onNetworkAddressChange(Key key, InetSocketAddress address);
+    protected abstract void onNetworkAddressChange(Key senderKey, InetSocketAddress newSocketAddress);
 
-    abstract protected void onNewNodeFound(NodeInfo info);
+    protected abstract void onNewNodeFound(NodeInfo info);
+
+    protected abstract void onNewForwardMessage(Message message,NodeInfo destination);
 
 
 }

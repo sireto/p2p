@@ -23,6 +23,7 @@ public class NodeListMessage extends Message{
     public NodeListMessage(Collection<NodeInfo> nodes){
         this.nodes=nodes;
     }
+
     @Override
     public byte[] writeToBytes() {
         KademliaNetworkMessageProtocol.NodeList.Builder listBuilder=KademliaNetworkMessageProtocol.NodeList.newBuilder();
@@ -36,7 +37,7 @@ public class NodeListMessage extends Message{
                     .build());
         }
 
-        return new byte[0];
+        return listBuilder.build().toByteArray();
     }
 
     @Override

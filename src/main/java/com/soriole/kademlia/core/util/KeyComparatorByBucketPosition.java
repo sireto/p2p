@@ -12,11 +12,11 @@ import java.util.Comparator;
  *
  * @author Grzegorz Milka
  */
-public class KeyByBucketPositionComparator implements Comparator<Key>, Serializable {
+public class KeyComparatorByBucketPosition implements Comparator<Key>, Serializable {
     private static final long serialVersionUID = 1L;
     private final Key mReferenceKey;
 
-    public KeyByBucketPositionComparator(Key key) {
+    public KeyComparatorByBucketPosition(Key key) {
         mReferenceKey = key;
     }
 

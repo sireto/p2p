@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-
+/**
+ * Listener Factory is responsible to create a new instance of MessageListener.
+ * {@link #getListener} does the job of finding listener for given message
+ */
 public class ListenerFactory {
     private static Logger logger= LoggerFactory.getLogger(ListenerFactory.class);
     public static class NoListenerException extends Exception {
@@ -36,10 +39,22 @@ public class ListenerFactory {
         return messageToListener;
     }
 
+    /**
+     *
+     *
+     * @param message The message for which listener is to be found
+     * @param bucket The kademlia bucket to use.        // this is required because the listener might want to make changes to kademliaBucket after reading message.
+     * @param server The server to use.                 //This is required because the listener may want to send further messages.
+     * @return MessageListener instance for given message type.
+     * @throws NoListenerException
+     */
 
     public static MessageListener getListener(Message message, ContactBucket bucket, KademliaMessageServer server)
             throws NoListenerException {
         Class listenerClass = messageToListener.get(message.getClass());
+        if(listenerClass==null){
+            throw new NoListenerException();
+        }
         try {
              MessageListener listener= (MessageListener)listenerClass.getConstructor().newInstance(new Object[]{});
              listener.bucket=bucket;

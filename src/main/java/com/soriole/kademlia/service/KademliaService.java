@@ -12,20 +12,20 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 @Service("kademliaService")
 public class KademliaService {
     private static final Logger LOGGER = LoggerFactory.getLogger(KademliaService.class);
 
-    @Value("${local.key:10}")
+    @Value("${local.key:0}")
     public String localKeyValue;
     @Value("${local.address.ip}")
     public String localIp;
-    @Value("${local.address.port}")
+    @Value("${local.address.port:0}")
     public int localPort;
 
     @Value("${bootstrap.key}")
@@ -46,9 +46,22 @@ public class KademliaService {
     @PostConstruct
     public void init()  {
         // create local node info
+        // if the key is zero create a random key.
         NodeInfo localNode = new NodeInfo(new Key(localKeyValue));
+        if(localNode.getKey().equals(new Key("0"))){
+            byte[] info=new byte[20];
+            new Random().nextBytes(info);
+            localNode=new NodeInfo(new Key(info));
+
+        }
+
+        if(localKeyValue.equals(bootstrapKeyValue)) {
+            localPort=bootstrapPort;
+        }
+
         // create contact bucket
         contactBucket = new ContactBucket(localNode, 160, bucketSize);
+
         // create a message server
         try {
             server = new KademliaMessageServer(localPort, contactBucket);
@@ -57,26 +70,24 @@ public class KademliaService {
         }
         catch (Exception e){
             e.printStackTrace();
-            throw new NullPointerException();
+            throw new RuntimeException();
         }
 
         localNode.setLanAddress(server.getSocketAddress());
 
-        kademliaDHT = new KademliaExtendedDHT(contactBucket, server);
         try {
             server.start();
         } catch (SocketException e) {
             e.printStackTrace();
-        }
-        try {
-            // just to make sure the server startAsync gets completed in another thread.
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Looks like port is not availab.e");
         }
 
+        kademliaDHT = new KademliaExtendedDHT(contactBucket, server);
+
         if (!localKeyValue.equals(bootstrapKeyValue)) {
-            kademliaDHT.join(new NodeInfo(new Key(bootstrapKeyValue), new InetSocketAddress(bootstrapIp, bootstrapPort)));
+            if(!kademliaDHT.join(new NodeInfo(new Key(bootstrapKeyValue), new InetSocketAddress(bootstrapIp, bootstrapPort)))){
+                throw new RuntimeException("Cannot Connect with Bootstrap node");
+            }
         }
     }
 
@@ -117,7 +128,7 @@ public class KademliaService {
     @PreDestroy
     public void destroy(){
         try {
-            server.stop(0);
+            server.shutDown(0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

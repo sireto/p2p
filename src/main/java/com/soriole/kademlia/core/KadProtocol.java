@@ -3,14 +3,9 @@ package com.soriole.kademlia.core;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.network.ServerShutdownException;
-import com.soriole.kademlia.network.server.DataGramServer;
 
-import javax.xml.soap.Node;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 /**
  *
@@ -25,7 +20,7 @@ public interface KadProtocol<T1> {
      * Iterative query that findsClosestNodes to a given key.
      * @return
      */
-    Collection<NodeInfo> findClosestNodes(Key key);
+    Collection<NodeInfo> findClosestNodes(Key key) throws ServerShutdownException;
 
     /*
     The sender of the STORE RPC provides a key and a block of data and requires that the recipient store the data and make it available for later retrieval by that key.
@@ -48,14 +43,14 @@ This is a primitive operation, not an iterative one.
 
      All RPC packets are required to carry an RPC identifier assigned by the sender and echoed in the reply. This is a quasi-random number of length B (160 bits).
      */
-    boolean ping(NodeInfo node);
+    long ping(NodeInfo node);
 
     /**
      * This function uses the kademlia algorithm  for locating the k nodes nearest to a key. It must be understood that these are not necessarily closest in a strict sense. Also, the algorithm is iterative although the paper describes it as recursive.
 
      The search begins by selecting alpha contacts from the non-empty k-bucket closest to the bucket appropriate to the key being searched on. If there are fewer than alpha contacts in that bucket, contacts are selected from other buckets. The contact closest to the target key, closestNode, is noted.
      */
-    NodeInfo findNode(Key key);
+    NodeInfo findNode(Key key) throws ServerShutdownException;
 
     /**
      * If no node lookups have been performed in any given bucket's range for tRefresh (an hour in basic Kademlia), the node selects a random number in that range and does a refresh, an iterativeFindNode using that number as key.

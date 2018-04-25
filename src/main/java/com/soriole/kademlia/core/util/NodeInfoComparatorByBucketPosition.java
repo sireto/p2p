@@ -6,12 +6,12 @@ import com.soriole.kademlia.core.store.NodeInfo;
 import java.util.Comparator;
 
 public class NodeInfoComparatorByBucketPosition implements Comparator<NodeInfo> {
-    KeyByBucketPositionComparator comparator;
+    KeyComparatorByBucketPosition comparator;
     public NodeInfoComparatorByBucketPosition(NodeInfo node){
-        comparator=new KeyByBucketPositionComparator(node.getKey());
+        comparator=new KeyComparatorByBucketPosition(node.getKey());
     }
     public NodeInfoComparatorByBucketPosition(Key key){
-        comparator=new KeyByBucketPositionComparator(key);
+        comparator=new KeyComparatorByBucketPosition(key);
     }
     @Override
     public int compare(NodeInfo o1, NodeInfo o2) {

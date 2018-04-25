@@ -6,7 +6,10 @@ import com.soriole.kademlia.core.messages.listeners.MessageListener;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
+import com.soriole.kademlia.core.NodeInteractionListener;
 import com.soriole.kademlia.network.server.SessionServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -16,16 +19,24 @@ import java.util.Random;
 import java.util.concurrent.*;
 
 public class KademliaMessageServer extends SessionServer {
+    private static Logger LOGGER = LoggerFactory.getLogger(KademliaMessageServer.class);
+    NodeInteractionListener nodeInteractionListener = getDefaultInteractionListener();
+
     int port;
     private static final int nThreadCount = 10;
-    ExecutorService workerPool=null;
+    ExecutorService workerPool = null;
 
     public void setAlpha(int a) {
     }
 
-    public KademliaMessageServer(int listeningPort, ContactBucket bucket) throws SocketException {
+    public KademliaMessageServer(int listeningPort, ContactBucket bucket,ExecutorService service) throws SocketException {
         super(new DatagramSocket(listeningPort), bucket);
+        this.workerPool=service;
+        this.port = listeningPort;
 
+    }
+    public KademliaMessageServer(int listeningPort, ContactBucket bucket) throws SocketException {
+        this(listeningPort, bucket,null);
     }
 
     public void sendMessage(NodeInfo receiver, Message message) throws IOException {
@@ -42,7 +53,12 @@ public class KademliaMessageServer extends SessionServer {
     public Message queryFor(Message incoming, Message reply) throws TimeoutException, IOException {
         reply.sessionId = incoming.sessionId;
         reply.mDestNodeInfo = incoming.mSrcNodeInfo;
-        return super.query(reply);
+        try {
+            return super.query(reply);
+        } catch (TimeoutException e) {
+            // catch and rethrow it. so that stack trace looks good.
+            throw e;
+        }
 
     }
 
@@ -52,12 +68,18 @@ public class KademliaMessageServer extends SessionServer {
         submitQuerytoPool(reply, msgReceiver);
     }
 
-    public Message startQuery(NodeInfo receiver, Message message) throws TimeoutException, IOException{
+    public Message startQuery(NodeInfo receiver, Message message) throws TimeoutException, IOException {
         message.mDestNodeInfo = receiver;
         message.sessionId = new Random().nextLong();
+        try {
+            message = super.query(message);
+            return message;
+        }
+        catch (TimeoutException e){
+            // catch and rethrow it so that the stack trace is small
+            throw e;
+        }
 
-        message = super.query(message);
-        return message;
     }
 
 
@@ -75,6 +97,7 @@ public class KademliaMessageServer extends SessionServer {
         workerPool.submit(() -> {
             try {
                 msgReceiver.onReceive(super.query(message));
+                return;
             } catch (TimeoutException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -99,35 +122,48 @@ public class KademliaMessageServer extends SessionServer {
                 }
             });
         } catch (ListenerFactory.NoListenerException e) {
+            LOGGER.warn(message.getClass().getSimpleName() + " : sent by `" + message.mSrcNodeInfo.getKey() + "` received and dropped ");
             return;
         }
         ;
     }
 
-    public boolean stop(int timeSeconds) throws InterruptedException {
-        if(workerPool.isShutdown()){
+    public boolean shutDown(int timeSeconds) throws InterruptedException {
+        if (workerPool.isShutdown()) {
             return false;
         }
         super.stopListening();
         this.workerPool.awaitTermination(timeSeconds, TimeUnit.SECONDS);
         this.workerPool.shutdown();
-        this.workerPool=null;
+        this.workerPool = null;
         return true;
 
     }
+    public boolean stop(){
+        if(this.socket.isClosed()){
+            return false;
+        }
+        super.stopListening();
+        return true;
+    }
 
     /**
-     *
      * @return True if server begins starts , False if server was already running
      * @throws SocketException
      */
 
     public boolean start() throws SocketException {
-        if (this.workerPool==null) {
+        if (this.workerPool == null) {
             this.workerPool = Executors.newFixedThreadPool(nThreadCount);
         }
-        if (this.socket.isClosed() || !this.socket.isConnected()) {
-            this.socket=new DatagramSocket(port);
+
+        if (this.socket.isClosed()) {
+            this.socket = new DatagramSocket(port);
+            workerPool.submit(() -> listen());
+            return true;
+        }
+        // socket is created but not started to read
+        else if (!this.socket.isConnected()) {
             workerPool.submit(() -> listen());
             return true;
         }
@@ -135,17 +171,51 @@ public class KademliaMessageServer extends SessionServer {
         return false;
     }
 
-    public void pause() {
-        super.stopListening();
-    }
-
     @Override
-    protected void onNetworkAddressChange(Key key, InetSocketAddress address) {
-        // TODO: LET'S IGNORE THIS NOW.
+    protected void onNetworkAddressChange(Key senderKey, InetSocketAddress newSocketAddress) {
+        workerPool.submit(() -> nodeInteractionListener.onNetworkAddressChange(senderKey, newSocketAddress));
     }
 
     @Override
     protected void onNewNodeFound(NodeInfo info) {
-        // TODO: Important. A node unknown to us somehow managed to contact us.
+        workerPool.submit(() -> nodeInteractionListener.onNewNodeFound(info));
     }
+
+    @Override
+    protected void onNewForwardMessage(Message message, NodeInfo destination) {
+        if(destination!=null){
+            try {
+                sendMessage(destination,message);
+            } catch (IOException e) {
+                LOGGER.warn("Forwarding message to `"+destination.toString()+"` failed!");
+            }
+        }
+        workerPool.submit(() -> nodeInteractionListener.onNewForwardMessage(message,destination));
+    }
+
+    public void setNodeInteractionListener(NodeInteractionListener listener) {
+        this.nodeInteractionListener = listener;
+    }
+
+    // the default interaction listener.
+    private static NodeInteractionListener getDefaultInteractionListener() {
+        return new NodeInteractionListener() {
+            @Override
+            public void onNetworkAddressChange(Key key, InetSocketAddress address) {
+                LOGGER.warn("Ignoring Network Address change of : " + key.toString());
+
+            }
+
+            @Override
+            public void onNewNodeFound(NodeInfo info) {
+                LOGGER.warn("Bucket overflow occured and the contact is ignored : " + info.getKey().toString());
+
+            }
+            @Override
+            public void onNewForwardMessage(Message message, NodeInfo destination) {
+                LOGGER.warn("Message to be forwarded to `"+destination.toString()+"` is dropped");
+            }
+        };
+    }
+
 }

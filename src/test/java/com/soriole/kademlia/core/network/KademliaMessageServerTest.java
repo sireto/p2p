@@ -72,9 +72,9 @@ public class KademliaMessageServerTest extends KademliaMessageServer{
         // check that the replied message is same as the original message.
         NodeLookupMessage reply=(NodeLookupMessage) mReply;
         assert(reply.lookupKey.equals(k1));
-        server.stop(1);
+        server.shutDown(1);
 
-        this.stop(1);
+        this.shutDown(1);
         // nothing went wrong. thus the serialization, the session and message type mapping also is working fine.
 
     }

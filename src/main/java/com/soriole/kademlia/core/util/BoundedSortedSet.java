@@ -26,10 +26,7 @@ public class BoundedSortedSet<Type> extends TreeSet<Type>{
 
         if (this.size() > mUpperCountBound) {
             assert this.size() == mUpperCountBound + 1;
-
-            Type lastElement =this.last();
-            this.remove(lastElement);
-            return this.comparator().compare(element, lastElement) == 0;
+            return this.comparator().compare(element,pollLast()) ==0;
         } else {
             return true;
         }

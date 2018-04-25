@@ -64,6 +64,13 @@ public class NodeInfo implements Serializable,Comparable{
 
     @Override
     public String toString() {
+        if(getKey()==null){
+            return "nullNodeInfo";
+        }
+        return getKey().toString();
+
+    }
+    public String toDetailString(){
         return String.format("NodeInfo[key: %s, lan address: %s, wan address: %s]", mKey, mLanAddress, mWanAddress);
     }
 

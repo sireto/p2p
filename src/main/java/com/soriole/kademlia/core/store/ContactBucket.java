@@ -1,8 +1,10 @@
 package com.soriole.kademlia.core.store;
 
 import com.soriole.kademlia.core.util.BoundedSortedSet;
-import com.soriole.kademlia.core.util.KeyByBucketPositionComparator;
+import com.soriole.kademlia.core.util.KeyComparatorByBucketPosition;
 import com.soriole.kademlia.core.util.NodeInfoComparatorByBucketPosition;
+import com.soriole.kademlia.core.util.NodeInfoComparatorByDistance;
+
 import java.util.*;
 
 /**
@@ -134,9 +136,10 @@ public class ContactBucket {
         return buckets[distance].remove(new Contact(new NodeInfo(key)));
     }
 
-    synchronized public Collection<NodeInfo> getClosestNodes(Key key) {
+    synchronized public BoundedSortedSet<NodeInfo> getClosestNodes(Key key) {
         /// TODO: This can be optimized.
-        Set<NodeInfo> closestNodes = new BoundedSortedSet<>(k, new NodeInfoComparatorByBucketPosition(key));
+        // we will return k+1 entries instead of k.
+        BoundedSortedSet<NodeInfo> closestNodes = new BoundedSortedSet<>(k+1, new NodeInfoComparatorByDistance(key));
         for (int i = 0; i < buckets.length; i++) {
             for (Contact c : buckets[i]) {
                 closestNodes.add(c.info);
@@ -159,12 +162,13 @@ public class ContactBucket {
         return localNode;
     }
 
-    synchronized public void putAllNodes(Collection<NodeInfo> collection) {
+    synchronized public boolean  putAllNodes(Collection<NodeInfo> collection) {
+        boolean ret=true;
         for (NodeInfo n : collection) {
-            this.putNode(n);
+            ret &= this.putNode(n);
         }
+        return ret;
     }
-
 }
 
 class Contact implements Comparable{
@@ -205,8 +209,8 @@ class Contact implements Comparable{
 
 class ContactComparatorByBucketPosition implements Comparator<Contact> {
 
-    KeyByBucketPositionComparator comparator;
-    public ContactComparatorByBucketPosition(KeyByBucketPositionComparator comparator){
+    KeyComparatorByBucketPosition comparator;
+    public ContactComparatorByBucketPosition(KeyComparatorByBucketPosition comparator){
         this.comparator=comparator;
     }
     @Override

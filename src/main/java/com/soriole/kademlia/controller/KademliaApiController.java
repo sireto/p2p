@@ -4,15 +4,16 @@ import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.model.remote.NodeInfoBean;
 import com.soriole.kademlia.model.remote.NodeInfoCollectionBean;
+import com.soriole.kademlia.network.ServerShutdownException;
 import com.soriole.kademlia.service.KademliaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.websocket.server.PathParam;
 import java.net.SocketException;
 import java.util.Collection;
 
@@ -47,18 +48,12 @@ public class KademliaApiController {
 
     @GetMapping(value = "/stop")
     public String stop() {
-        try {
-            if(kademliaService.getKademliaProtocol().server.stop(2)){
-               return "STOPPED";
-            }
-            else{
-                return "Server was already not running.";
-            }
-        } catch (InterruptedException e) {
-            //  nobody interrupts this thread here.
-            e.printStackTrace();
+        if(kademliaService.getKademliaProtocol().server.stop()){
+           return "STOPPED";
         }
-        return "Unexpected condition";
+        else{
+            return "Server was already not running.";
+        }
     }
 
     @GetMapping(value = "/routing_table")
@@ -78,9 +73,9 @@ public class KademliaApiController {
     }
 
     @GetMapping(value = "/find_nodes/{key}")
-    public NodeInfoCollectionBean findNodes(@PathParam("key") String paramKey) {
+    public NodeInfoCollectionBean findNodes(@PathVariable("key") String paramKey) throws ServerShutdownException {
         LOGGER.info("findNodes({})", paramKey);
-        Key key = new Key(paramKey);
+            Key key = new Key(paramKey);
 
         Collection<NodeInfo> nodeInfos = null;
         nodeInfos = kademliaService.getKademliaProtocol().findClosestNodes(key);
@@ -100,4 +95,5 @@ public class KademliaApiController {
     public String getKey() {
         return kademliaService.getKademliaProtocol().bucket.getLocalNode().getKey().toString();
     }
+
 }
