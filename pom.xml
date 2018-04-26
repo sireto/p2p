@@ -99,9 +99,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
-
-		<!--To solve issues with java 9-->
-
+		<dependency>
+			<groupId>org.mapdb</groupId>
+			<artifactId>mapdb</artifactId>
+			<version>3.0.5</version>
+		</dependency>
     </dependencies>
 
 	<build>

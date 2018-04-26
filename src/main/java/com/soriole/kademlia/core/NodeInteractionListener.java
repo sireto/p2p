@@ -8,7 +8,7 @@ import java.net.InetSocketAddress;
 
 public interface NodeInteractionListener {
     // network address of a node has changed.
-   void onNetworkAddressChange(Key key, InetSocketAddress address);
+   void onNetworkAddressChange(Key senderKey, InetSocketAddress address);
 
    // new node has been found.
    void onNewNodeFound(NodeInfo info);

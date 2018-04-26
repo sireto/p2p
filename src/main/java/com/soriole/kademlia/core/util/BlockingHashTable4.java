@@ -73,6 +73,15 @@ public class BlockingHashTable4<Type1, Type2> {
         ioLock.unlock();
     }
 
+    public Type2 getIfExists(Type1 key) {
+        ioLock.lock();
+        Type2 returnValue = hashStore.remove(key);
+        waiters.remove(key);
+        ioLock.unlock();
+        return returnValue;
+    }
+
+
     public boolean putIfGetterWaiting(Type1 key, Type2 value) {
         boolean ret=true;
         ioLock.lock();

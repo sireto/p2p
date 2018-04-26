@@ -940,7 +940,7 @@ public final class MessageSerializationProtocol {
   }
   /**
    * <pre>
-   * this messages Data will be converted to bytes while keeping inside messages
+   * this messages DataMessage will be converted to bytes while keeping inside messages
    * </pre>
    *
    * Protobuf type {@code messages.MessageData}
@@ -1270,7 +1270,7 @@ public final class MessageSerializationProtocol {
     }
     /**
      * <pre>
-     * this messages Data will be converted to bytes while keeping inside messages
+     * this messages DataMessage will be converted to bytes while keeping inside messages
      * </pre>
      *
      * Protobuf type {@code messages.MessageData}

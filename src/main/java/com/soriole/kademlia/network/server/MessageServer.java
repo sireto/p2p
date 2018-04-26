@@ -41,28 +41,35 @@ abstract class MessageServer extends DataGramServer {
         this.bucket = bucket;
     }
 
-    protected void sendMessage(Message message) throws IOException {
-
+    protected void sendMessage(Message message, NodeInfo receiver, long sessionId) throws IOException {
+        if(bucket.getLocalNode().equals(receiver)){
+            logger.warn("Coding Error ! The server is trying to send message to itself!");
+            return;
+        }
         if (message.mSrcNodeInfo == null) {
             message.mSrcNodeInfo = bucket.getLocalNode();
         }
 
         KademliaNetworkMessageProtocol.Message.Builder builder = KademliaNetworkMessageProtocol.Message.newBuilder();
         builder.setSender(ByteString.copyFrom(message.mSrcNodeInfo.getKey().toBytes()))
-                .setSessionId(message.sessionId)
+                .setSessionId(sessionId)
                 .setType(message.getClass().getAnnotation(MessageType.class).type());
-        if (message.mDestNodeInfo.getKey() != null) {
-            builder.setReceiver(ByteString.copyFrom(message.mDestNodeInfo.getKey().toBytes()));
+        if (receiver.getKey() != null) {
+            builder.setReceiver(ByteString.copyFrom(receiver.getKey().toBytes()));
         }
 
         byte[] data = message.writeToBytes();
         if (data != null) {
             builder.setMessageData(ByteString.copyFrom(data));
         }
-        DatagramPacket packet = super.createPacket(builder.build().toByteArray(), message.mDestNodeInfo.getLanAddress());
+        DatagramPacket packet = super.createPacket(builder.build().toByteArray(), receiver.getLanAddress());
         super.sendPacket(packet);
     }
 
+    protected void sendMessage(Message message) throws IOException {
+        sendMessage(message, message.mDestNodeInfo, message.sessionId);
+
+    }
     protected Message receiveMessage() throws  IOException {
         DatagramPacket packet = receivePacket();
         byte[] data = Arrays.copyOf(packet.getData(), packet.getLength());

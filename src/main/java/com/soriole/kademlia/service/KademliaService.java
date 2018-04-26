@@ -1,10 +1,9 @@
 package com.soriole.kademlia.service;
 
 import com.soriole.kademlia.core.*;
-import com.soriole.kademlia.core.store.ContactBucket;
-import com.soriole.kademlia.core.store.Key;
-import com.soriole.kademlia.core.store.NodeInfo;
+import com.soriole.kademlia.core.store.*;
 import com.soriole.kademlia.network.KademliaMessageServer;
+import com.soriole.kademlia.network.ServerShutdownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
@@ -58,13 +58,14 @@ public class KademliaService {
         if(localKeyValue.equals(bootstrapKeyValue)) {
             localPort=bootstrapPort;
         }
+        KeyValueStore<byte[]> keyValueStore=new KeyValueStore<>(1000*60*60*24);
 
         // create contact bucket
         contactBucket = new ContactBucket(localNode, 160, bucketSize);
 
         // create a message server
         try {
-            server = new KademliaMessageServer(localPort, contactBucket);
+            server = new KademliaMessageServer(localPort, contactBucket,keyValueStore);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -82,7 +83,7 @@ public class KademliaService {
             throw new RuntimeException("Looks like port is not availab.e");
         }
 
-        kademliaDHT = new KademliaExtendedDHT(contactBucket, server);
+        kademliaDHT = new KademliaExtendedDHT(contactBucket, server,keyValueStore);
 
         if (!localKeyValue.equals(bootstrapKeyValue)) {
             if(!kademliaDHT.join(new NodeInfo(new Key(bootstrapKeyValue), new InetSocketAddress(bootstrapIp, bootstrapPort)))){
@@ -94,11 +95,16 @@ public class KademliaService {
     // returns ID of the node subscribed by the client
     public String findValue(String key) {
         try {
-            return kademliaDHT.findValue(new Key(key));
-        } catch (KademliaException e) {
+            return new String(kademliaDHT.findValue(new Key(key)).getData());
+        }
+        catch (ServerShutdownException e) {
             e.printStackTrace();
         }
-        return null;
+        catch (NoSuchElementException ex){
+            //ignore
+        }
+        return "Null";
+
     }
 
     // sends messages to the  node given by the nodeID. waits for acknowledgement.
@@ -116,8 +122,14 @@ public class KademliaService {
         return null;
     }
 
-    public void store(String key, String value) {
-        kademliaDHT.store(new Key(key), value);
+    public boolean store(String key, String value) {
+        try {
+            kademliaDHT.store(new Key(key), value.getBytes());
+            return true;
+        } catch (ServerShutdownException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 
@@ -128,9 +140,17 @@ public class KademliaService {
     @PreDestroy
     public void destroy(){
         try {
-            server.shutDown(0);
+            server.shutDown(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public String findLocal(String key){
+        TimeStampedData<byte[]> data=kademliaDHT.keyValueStore.get(new Key(key));
+        if(data==null){
+            return "Null";
+        }
+        return new String(data.getData());
     }
 }

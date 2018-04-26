@@ -136,17 +136,53 @@ public class ContactBucket {
         return buckets[distance].remove(new Contact(new NodeInfo(key)));
     }
 
-    synchronized public BoundedSortedSet<NodeInfo> getClosestNodes(Key key) {
-        /// TODO: This can be optimized.
-        // we will return k+1 entries instead of k.
-        BoundedSortedSet<NodeInfo> closestNodes = new BoundedSortedSet<>(k+1, new NodeInfoComparatorByDistance(key));
-        for (int i = 0; i < buckets.length; i++) {
-            for (Contact c : buckets[i]) {
-                closestNodes.add(c.info);
+    /**
+     *  -- Find the buket position for the node.
+     *  -- Add all contacts in that bucket.
+     *  -- Traverse both left and right simultaneously until BoundeSortedSet is not full.
+     *
+     */
+    synchronized public BoundedSortedSet<NodeInfo> getClosestNodes(Key key, int count) {
+
+        BoundedSortedSet_NodeInfo closestNodes = new BoundedSortedSet_NodeInfo(count+1, key);
+
+        int pos = getLocalNode().getKey().getBucketPosition(key);
+        if(pos<0){
+            pos++;
+        }
+        // put all nodes in that bucket to the list
+        closestNodes.addAllContacts(buckets[pos]);
+
+        int i = 1;
+
+        while (!closestNodes.isFull()) {
+            if ((pos - i) < 0) {
+                while (!closestNodes.isFull() && i < buckets.length) {
+                    closestNodes.addAllContacts(buckets[i]);
+                    i++;
+                }
+                break;
+
+            } else if (pos + i >= buckets.length) {
+                i=pos-i;
+                while (!closestNodes.isFull() && i > -1) {
+                    closestNodes.addAllContacts(buckets[i]);
+                    i--;
+                }
+                break;
+
             }
+            closestNodes.addAllContacts(buckets[pos-i]);
+            closestNodes.addAllContacts(buckets[pos+i]);
+            i++;
         }
         return closestNodes;
     }
+
+    public BoundedSortedSet<NodeInfo> getClosestNodes(Key key) {
+        return getClosestNodes(key, k);
+    }
+
 
     synchronized public Collection<NodeInfo> getAllNodes() {
         ArrayList<NodeInfo> allNode = new ArrayList<>(20);
@@ -168,6 +204,11 @@ public class ContactBucket {
             ret &= this.putNode(n);
         }
         return ret;
+    }
+
+    @Override
+    public String toString(){
+        return getAllNodes().toString();
     }
 }
 
@@ -241,4 +282,17 @@ class ContactComparatorByLastActive implements Comparator<Contact>{
         return comparator;
     }
 
+}
+
+class BoundedSortedSet_NodeInfo extends BoundedSortedSet<NodeInfo> {
+
+    public BoundedSortedSet_NodeInfo(int upperBound, Key k) {
+        super(upperBound, new NodeInfoComparatorByDistance(new NodeInfo(k)));
+    }
+
+    void addAllContacts(Collection<Contact> cc) {
+        for (Contact c : cc) {
+            add(c.info);
+        }
+    }
 }

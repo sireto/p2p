@@ -12,7 +12,7 @@ message Message {
     optional bytes messageByte=5;
     required bytes checksum = 6;
 }
-// this messages Data will be converted to bytes while keeping inside messages
+// this messages DataMessage will be converted to bytes while keeping inside messages
 message MessageData{
     required int32 version = 1;
     optional int32 type=3;

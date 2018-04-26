@@ -81,10 +81,25 @@ public class NodeInfo implements Serializable,Comparable{
 
     @Override
     public int compareTo(Object o) {
-        if(o instanceof NodeInfo)
-            return getKey().compareTo(((NodeInfo) o).getKey());
-        if(o instanceof Key)
-            return getKey().compareTo(o);
+        if(getKey()!=null){
+            if(o instanceof NodeInfo)
+                return getKey().compareTo(((NodeInfo) o).getKey());
+            if(o instanceof Key)
+                return getKey().compareTo(o);
+        }
+        else{
+            if(o instanceof NodeInfo)
+                if(((NodeInfo) o).getKey()==null){
+                    return 0;
+                }
+                else{
+                    return -1;
+                }
+            if(o instanceof Key)
+                return 1;
+            if(o==null)
+                return 0;
+        }
         throw new IllegalArgumentException("Type NodeInfo cannot be compared with "+o.getClass().getName());
     }
     public NodeInfo clone(){

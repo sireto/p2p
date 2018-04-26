@@ -7,6 +7,9 @@ import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.core.NodeInteractionListener;
+import com.soriole.kademlia.core.store.KeyValueStore;
+import com.soriole.kademlia.network.receivers.BulkMessageReceiver;
+import com.soriole.kademlia.network.receivers.MessageReceiver;
 import com.soriole.kademlia.network.server.SessionServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,29 +18,42 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.*;
 
 public class KademliaMessageServer extends SessionServer {
-    private static Logger LOGGER = LoggerFactory.getLogger(KademliaMessageServer.class);
-    NodeInteractionListener nodeInteractionListener = getDefaultInteractionListener();
-
+    private static Logger LOGGER = LoggerFactory.getLogger(KademliaMessageServer.class.getSimpleName());
+    NodeInteractionListener nodeInteractionListener ;
     int port;
     private static final int nThreadCount = 10;
     ExecutorService workerPool = null;
+    private KeyValueStore keyStore;
 
     public void setAlpha(int a) {
     }
 
-    public KademliaMessageServer(int listeningPort, ContactBucket bucket,ExecutorService service) throws SocketException {
+    public KademliaMessageServer(int listeningPort, ContactBucket bucket,ExecutorService service,KeyValueStore store) throws SocketException {
         super(new DatagramSocket(listeningPort), bucket);
+        nodeInteractionListener=getDefaultInteractionListener(bucket);
         this.workerPool=service;
         this.port = listeningPort;
+        this.keyStore=store;
 
     }
+
+    // this method was used when the kademlia DHT didn't had implementation of storage.
+    // this will be removed in future refactor.
+    @Deprecated
     public KademliaMessageServer(int listeningPort, ContactBucket bucket) throws SocketException {
         this(listeningPort, bucket,null);
     }
+
+    public KademliaMessageServer(int listeningPort, ContactBucket bucket,KeyValueStore store) throws SocketException {
+        this(listeningPort, bucket,null,store);
+    }
+
 
     public void sendMessage(NodeInfo receiver, Message message) throws IOException {
         message.mDestNodeInfo = receiver;
@@ -50,16 +66,43 @@ public class KademliaMessageServer extends SessionServer {
         super.sendMessage(reply);
     }
 
-    public Message queryFor(Message incoming, Message reply) throws TimeoutException, IOException {
+    public Message queryFor(Message incoming, Message reply) throws TimeoutException, ServerShutdownException{
         reply.sessionId = incoming.sessionId;
         reply.mDestNodeInfo = incoming.mSrcNodeInfo;
-        try {
-            return super.query(reply);
-        } catch (TimeoutException e) {
-            // catch and rethrow it. so that stack trace looks good.
-            throw e;
-        }
+        return super.query(reply);
 
+    }
+
+    /**
+     * Make asynchronous queries to all the nodes in the list and return the replies.
+     *
+     * <b>Note:</b> Even though the request handling is asynchronous, the  call will wait until all the nodes
+     * have replied or timeout has occured.
+     *
+     * @param nodes
+     * @param queryMessage
+     * @return
+     * @throws IOException
+     */
+    public Collection<Message> startAsyncQueryAll(Collection<NodeInfo> nodes, Message queryMessage) {
+        final BulkMessageReceiver receiver=new BulkMessageReceiver(nodes.size());
+        final Random random = new Random();
+        // copy the list so that there's no inconsistency if calling thread modifies the passed collection.
+        for (NodeInfo node: new ArrayList<>(nodes)){
+            workerPool.submit(() -> {
+                try {
+                    receiver.onReceive(super.query(queryMessage,node,random.nextLong()));
+                    return;
+                } catch (TimeoutException e) {
+                    // this is normal to happen
+                } catch (ServerShutdownException e) {
+                    e.printStackTrace();
+                }
+                LOGGER.info("Timeout on startAsyncQuery to : "+node.getKey());
+                receiver.onTimeout();
+            });
+        }
+        return receiver.getMessages();
     }
 
     public void asynQueryFor(Message incoming, Message reply, MessageReceiver msgReceiver) throws ServerShutdownException {
@@ -68,17 +111,10 @@ public class KademliaMessageServer extends SessionServer {
         submitQuerytoPool(reply, msgReceiver);
     }
 
-    public Message startQuery(NodeInfo receiver, Message message) throws TimeoutException, IOException {
+    public Message startQuery(NodeInfo receiver, Message message) throws TimeoutException, ServerShutdownException {
         message.mDestNodeInfo = receiver;
-        message.sessionId = new Random().nextLong();
-        try {
             message = super.query(message);
             return message;
-        }
-        catch (TimeoutException e){
-            // catch and rethrow it so that the stack trace is small
-            throw e;
-        }
 
     }
 
@@ -86,7 +122,7 @@ public class KademliaMessageServer extends SessionServer {
     public void startQueryAsync(NodeInfo receiver, Message message, final MessageReceiver msgReceiver) throws ServerShutdownException {
 
         message.mDestNodeInfo = receiver;
-        message.sessionId = new Random().nextLong();
+        message.sessionId=new Random().nextLong();
         submitQuerytoPool(message, msgReceiver);
     }
 
@@ -100,7 +136,7 @@ public class KademliaMessageServer extends SessionServer {
                 return;
             } catch (TimeoutException e) {
                 e.printStackTrace();
-            } catch (IOException e) {
+            } catch (ServerShutdownException e) {
                 e.printStackTrace();
             }
             msgReceiver.onTimeout();
@@ -113,7 +149,7 @@ public class KademliaMessageServer extends SessionServer {
     protected void OnNewMessage(final Message message) {
         final MessageListener listener;
         try {
-            listener = ListenerFactory.getListener(message, bucket, this);
+            listener = ListenerFactory.getListener(message, bucket, this,keyStore);
             workerPool.submit(() -> {
                 try {
                     listener.onReceive(message);
@@ -163,7 +199,7 @@ public class KademliaMessageServer extends SessionServer {
             return true;
         }
         // socket is created but not started to read
-        else if (!this.socket.isConnected()) {
+        else if (!this.listening) {
             workerPool.submit(() -> listen());
             return true;
         }
@@ -186,8 +222,9 @@ public class KademliaMessageServer extends SessionServer {
         if(destination!=null){
             try {
                 sendMessage(destination,message);
+                LOGGER.info("Received "+message.getClass().getSimpleName()+" to be forwarded to : "+destination.toString());
             } catch (IOException e) {
-                LOGGER.warn("Forwarding message to `"+destination.toString()+"` failed!");
+                LOGGER.info("Forwarding message to `"+destination.toString()+"` failed!");
             }
         }
         workerPool.submit(() -> nodeInteractionListener.onNewForwardMessage(message,destination));
@@ -198,17 +235,20 @@ public class KademliaMessageServer extends SessionServer {
     }
 
     // the default interaction listener.
-    private static NodeInteractionListener getDefaultInteractionListener() {
+    private static NodeInteractionListener getDefaultInteractionListener(ContactBucket b) {
+        ContactBucket bucket=b;
         return new NodeInteractionListener() {
             @Override
-            public void onNetworkAddressChange(Key key, InetSocketAddress address) {
-                LOGGER.warn("Ignoring Network Address change of : " + key.toString());
+            public void onNetworkAddressChange(Key senderKey, InetSocketAddress address) {
+                NodeInfo senderInfo=bucket.getNode(senderKey);
+                LOGGER.warn("Network address  of : " + senderKey.toString()+" changed from "+ senderInfo.getLanAddress().toString() +" to "+address);
+                senderInfo.setLanAddress(address);
 
             }
 
             @Override
             public void onNewNodeFound(NodeInfo info) {
-                LOGGER.warn("Bucket overflow occured and the contact is ignored : " + info.getKey().toString());
+                //LOGGER.warn("Bucket overflow occured and the contact is ignored : " + info.getKey().toString());
 
             }
             @Override

@@ -931,7 +931,7 @@ public final class KademliaNetworkMessageProtocol {
   }
   /**
    * <pre>
-   * this messages Data will be converted to bytes while keeping inside messages
+   * this messages DataMessage will be converted to bytes while keeping inside messages
    * </pre>
    *
    * Protobuf type {@code message.NodeInfo}
@@ -1269,7 +1269,7 @@ public final class KademliaNetworkMessageProtocol {
     }
     /**
      * <pre>
-     * this messages Data will be converted to bytes while keeping inside messages
+     * this messages DataMessage will be converted to bytes while keeping inside messages
      * </pre>
      *
      * Protobuf type {@code message.NodeInfo}
@@ -2355,23 +2355,53 @@ public final class KademliaNetworkMessageProtocol {
 
   }
 
-  public interface ConnectMessageOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:message.ConnectMessage)
+  public interface KeyValueStoreMessageOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:message.KeyValueStoreMessage)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>required bytes key = 10;</code>
+     */
+    boolean hasKey();
+    /**
+     * <code>required bytes key = 10;</code>
+     */
+    com.google.protobuf.ByteString getKey();
+
+    /**
+     * <code>required bytes value = 11;</code>
+     */
+    boolean hasValue();
+    /**
+     * <code>required bytes value = 11;</code>
+     */
+    com.google.protobuf.ByteString getValue();
+
+    /**
+     * <code>required int64 expirationTime = 12;</code>
+     */
+    boolean hasExpirationTime();
+    /**
+     * <code>required int64 expirationTime = 12;</code>
+     */
+    long getExpirationTime();
   }
   /**
-   * Protobuf type {@code message.ConnectMessage}
+   * Protobuf type {@code message.KeyValueStoreMessage}
    */
-  public  static final class ConnectMessage extends
+  public  static final class KeyValueStoreMessage extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:message.ConnectMessage)
-      ConnectMessageOrBuilder {
+      // @@protoc_insertion_point(message_implements:message.KeyValueStoreMessage)
+      KeyValueStoreMessageOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use ConnectMessage.newBuilder() to construct.
-    private ConnectMessage(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use KeyValueStoreMessage.newBuilder() to construct.
+    private KeyValueStoreMessage(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private ConnectMessage() {
+    private KeyValueStoreMessage() {
+      key_ = com.google.protobuf.ByteString.EMPTY;
+      value_ = com.google.protobuf.ByteString.EMPTY;
+      expirationTime_ = 0L;
     }
 
     @java.lang.Override
@@ -2379,7 +2409,7 @@ public final class KademliaNetworkMessageProtocol {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ConnectMessage(
+    private KeyValueStoreMessage(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2387,6 +2417,7 @@ public final class KademliaNetworkMessageProtocol {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -2404,6 +2435,21 @@ public final class KademliaNetworkMessageProtocol {
               }
               break;
             }
+            case 82: {
+              bitField0_ |= 0x00000001;
+              key_ = input.readBytes();
+              break;
+            }
+            case 90: {
+              bitField0_ |= 0x00000002;
+              value_ = input.readBytes();
+              break;
+            }
+            case 96: {
+              bitField0_ |= 0x00000004;
+              expirationTime_ = input.readInt64();
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -2418,14 +2464,60 @@ public final class KademliaNetworkMessageProtocol {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_ConnectMessage_descriptor;
+      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreMessage_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_ConnectMessage_fieldAccessorTable
+      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreMessage_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage.Builder.class);
+              com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int KEY_FIELD_NUMBER = 10;
+    private com.google.protobuf.ByteString key_;
+    /**
+     * <code>required bytes key = 10;</code>
+     */
+    public boolean hasKey() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes key = 10;</code>
+     */
+    public com.google.protobuf.ByteString getKey() {
+      return key_;
+    }
+
+    public static final int VALUE_FIELD_NUMBER = 11;
+    private com.google.protobuf.ByteString value_;
+    /**
+     * <code>required bytes value = 11;</code>
+     */
+    public boolean hasValue() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required bytes value = 11;</code>
+     */
+    public com.google.protobuf.ByteString getValue() {
+      return value_;
+    }
+
+    public static final int EXPIRATIONTIME_FIELD_NUMBER = 12;
+    private long expirationTime_;
+    /**
+     * <code>required int64 expirationTime = 12;</code>
+     */
+    public boolean hasExpirationTime() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int64 expirationTime = 12;</code>
+     */
+    public long getExpirationTime() {
+      return expirationTime_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -2434,12 +2526,33 @@ public final class KademliaNetworkMessageProtocol {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
+      if (!hasKey()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasValue()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasExpirationTime()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(10, key_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(11, value_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(12, expirationTime_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -2448,6 +2561,18 @@ public final class KademliaNetworkMessageProtocol {
       if (size != -1) return size;
 
       size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(10, key_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(11, value_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(12, expirationTime_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -2458,12 +2583,27 @@ public final class KademliaNetworkMessageProtocol {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage)) {
+      if (!(obj instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage)) {
         return super.equals(obj);
       }
-      com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage other = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage) obj;
+      com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage other = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage) obj;
 
       boolean result = true;
+      result = result && (hasKey() == other.hasKey());
+      if (hasKey()) {
+        result = result && getKey()
+            .equals(other.getKey());
+      }
+      result = result && (hasValue() == other.hasValue());
+      if (hasValue()) {
+        result = result && getValue()
+            .equals(other.getValue());
+      }
+      result = result && (hasExpirationTime() == other.hasExpirationTime());
+      if (hasExpirationTime()) {
+        result = result && (getExpirationTime()
+            == other.getExpirationTime());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -2475,74 +2615,87 @@ public final class KademliaNetworkMessageProtocol {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasKey()) {
+        hash = (37 * hash) + KEY_FIELD_NUMBER;
+        hash = (53 * hash) + getKey().hashCode();
+      }
+      if (hasValue()) {
+        hash = (37 * hash) + VALUE_FIELD_NUMBER;
+        hash = (53 * hash) + getValue().hashCode();
+      }
+      if (hasExpirationTime()) {
+        hash = (37 * hash) + EXPIRATIONTIME_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getExpirationTime());
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(byte[] data)
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(java.io.InputStream input)
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseDelimitedFrom(java.io.InputStream input)
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseDelimitedFrom(
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parseFrom(
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2554,7 +2707,7 @@ public final class KademliaNetworkMessageProtocol {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage prototype) {
+    public static Builder newBuilder(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() {
@@ -2569,25 +2722,25 @@ public final class KademliaNetworkMessageProtocol {
       return builder;
     }
     /**
-     * Protobuf type {@code message.ConnectMessage}
+     * Protobuf type {@code message.KeyValueStoreMessage}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:message.ConnectMessage)
-        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessageOrBuilder {
+        // @@protoc_insertion_point(builder_implements:message.KeyValueStoreMessage)
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessageOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_ConnectMessage_descriptor;
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreMessage_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_ConnectMessage_fieldAccessorTable
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreMessage_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage.Builder.class);
+                com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage.Builder.class);
       }
 
-      // Construct using com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage.newBuilder()
+      // Construct using com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -2604,28 +2757,49 @@ public final class KademliaNetworkMessageProtocol {
       }
       public Builder clear() {
         super.clear();
+        key_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        value_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        expirationTime_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_ConnectMessage_descriptor;
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreMessage_descriptor;
       }
 
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage getDefaultInstanceForType() {
-        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage.getDefaultInstance();
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage getDefaultInstanceForType() {
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage.getDefaultInstance();
       }
 
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage build() {
-        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage result = buildPartial();
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage build() {
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage buildPartial() {
-        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage result = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage(this);
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage buildPartial() {
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage result = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.key_ = key_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.value_ = value_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.expirationTime_ = expirationTime_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -2657,22 +2831,40 @@ public final class KademliaNetworkMessageProtocol {
         return (Builder) super.addRepeatedField(field, value);
       }
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage) {
-          return mergeFrom((com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage)other);
+        if (other instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage) {
+          return mergeFrom((com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage other) {
-        if (other == com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage other) {
+        if (other == com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage.getDefaultInstance()) return this;
+        if (other.hasKey()) {
+          setKey(other.getKey());
+        }
+        if (other.hasValue()) {
+          setValue(other.getValue());
+        }
+        if (other.hasExpirationTime()) {
+          setExpirationTime(other.getExpirationTime());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
       }
 
       public final boolean isInitialized() {
+        if (!hasKey()) {
+          return false;
+        }
+        if (!hasValue()) {
+          return false;
+        }
+        if (!hasExpirationTime()) {
+          return false;
+        }
         return true;
       }
 
@@ -2680,17 +2872,120 @@ public final class KademliaNetworkMessageProtocol {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage parsedMessage = null;
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage) e.getUnfinishedMessage();
+          parsedMessage = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes key = 10;</code>
+       */
+      public boolean hasKey() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes key = 10;</code>
+       */
+      public com.google.protobuf.ByteString getKey() {
+        return key_;
+      }
+      /**
+       * <code>required bytes key = 10;</code>
+       */
+      public Builder setKey(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        key_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes key = 10;</code>
+       */
+      public Builder clearKey() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        key_ = getDefaultInstance().getKey();
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes value = 11;</code>
+       */
+      public boolean hasValue() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required bytes value = 11;</code>
+       */
+      public com.google.protobuf.ByteString getValue() {
+        return value_;
+      }
+      /**
+       * <code>required bytes value = 11;</code>
+       */
+      public Builder setValue(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        value_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes value = 11;</code>
+       */
+      public Builder clearValue() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        value_ = getDefaultInstance().getValue();
+        onChanged();
+        return this;
+      }
+
+      private long expirationTime_ ;
+      /**
+       * <code>required int64 expirationTime = 12;</code>
+       */
+      public boolean hasExpirationTime() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int64 expirationTime = 12;</code>
+       */
+      public long getExpirationTime() {
+        return expirationTime_;
+      }
+      /**
+       * <code>required int64 expirationTime = 12;</code>
+       */
+      public Builder setExpirationTime(long value) {
+        bitField0_ |= 0x00000004;
+        expirationTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int64 expirationTime = 12;</code>
+       */
+      public Builder clearExpirationTime() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        expirationTime_ = 0L;
+        onChanged();
         return this;
       }
       public final Builder setUnknownFields(
@@ -2704,39 +2999,1675 @@ public final class KademliaNetworkMessageProtocol {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:message.ConnectMessage)
+      // @@protoc_insertion_point(builder_scope:message.KeyValueStoreMessage)
     }
 
-    // @@protoc_insertion_point(class_scope:message.ConnectMessage)
-    private static final com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:message.KeyValueStoreMessage)
+    private static final com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage();
+      DEFAULT_INSTANCE = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage();
     }
 
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage getDefaultInstance() {
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<ConnectMessage>
-        PARSER = new com.google.protobuf.AbstractParser<ConnectMessage>() {
-      public ConnectMessage parsePartialFrom(
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<KeyValueStoreMessage>
+        PARSER = new com.google.protobuf.AbstractParser<KeyValueStoreMessage>() {
+      public KeyValueStoreMessage parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ConnectMessage(input, extensionRegistry);
+        return new KeyValueStoreMessage(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<ConnectMessage> parser() {
+    public static com.google.protobuf.Parser<KeyValueStoreMessage> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ConnectMessage> getParserForType() {
+    public com.google.protobuf.Parser<KeyValueStoreMessage> getParserForType() {
       return PARSER;
     }
 
-    public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.ConnectMessage getDefaultInstanceForType() {
+    public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreMessage getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface KeyValueStoreReplyOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:message.KeyValueStoreReply)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> 
+        getNodesList();
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo getNodes(int index);
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    int getNodesCount();
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    java.util.List<? extends com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> 
+        getNodesOrBuilderList();
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder getNodesOrBuilder(
+        int index);
+
+    /**
+     * <code>required bool stored = 11;</code>
+     */
+    boolean hasStored();
+    /**
+     * <code>required bool stored = 11;</code>
+     */
+    boolean getStored();
+  }
+  /**
+   * Protobuf type {@code message.KeyValueStoreReply}
+   */
+  public  static final class KeyValueStoreReply extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:message.KeyValueStoreReply)
+      KeyValueStoreReplyOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use KeyValueStoreReply.newBuilder() to construct.
+    private KeyValueStoreReply(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private KeyValueStoreReply() {
+      nodes_ = java.util.Collections.emptyList();
+      stored_ = false;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private KeyValueStoreReply(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 82: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                nodes_ = new java.util.ArrayList<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              nodes_.add(
+                  input.readMessage(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.PARSER, extensionRegistry));
+              break;
+            }
+            case 88: {
+              bitField0_ |= 0x00000001;
+              stored_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          nodes_ = java.util.Collections.unmodifiableList(nodes_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreReply_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreReply_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int NODES_FIELD_NUMBER = 10;
+    private java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> nodes_;
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    public java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> getNodesList() {
+      return nodes_;
+    }
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    public java.util.List<? extends com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> 
+        getNodesOrBuilderList() {
+      return nodes_;
+    }
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    public int getNodesCount() {
+      return nodes_.size();
+    }
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo getNodes(int index) {
+      return nodes_.get(index);
+    }
+    /**
+     * <code>repeated .message.NodeInfo nodes = 10;</code>
+     */
+    public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder getNodesOrBuilder(
+        int index) {
+      return nodes_.get(index);
+    }
+
+    public static final int STORED_FIELD_NUMBER = 11;
+    private boolean stored_;
+    /**
+     * <code>required bool stored = 11;</code>
+     */
+    public boolean hasStored() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bool stored = 11;</code>
+     */
+    public boolean getStored() {
+      return stored_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (!hasStored()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      for (int i = 0; i < getNodesCount(); i++) {
+        if (!getNodes(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < nodes_.size(); i++) {
+        output.writeMessage(10, nodes_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBool(11, stored_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < nodes_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(10, nodes_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(11, stored_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply)) {
+        return super.equals(obj);
+      }
+      com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply other = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply) obj;
+
+      boolean result = true;
+      result = result && getNodesList()
+          .equals(other.getNodesList());
+      result = result && (hasStored() == other.hasStored());
+      if (hasStored()) {
+        result = result && (getStored()
+            == other.getStored());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getNodesCount() > 0) {
+        hash = (37 * hash) + NODES_FIELD_NUMBER;
+        hash = (53 * hash) + getNodesList().hashCode();
+      }
+      if (hasStored()) {
+        hash = (37 * hash) + STORED_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getStored());
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code message.KeyValueStoreReply}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:message.KeyValueStoreReply)
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReplyOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreReply_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreReply_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply.Builder.class);
+      }
+
+      // Construct using com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getNodesFieldBuilder();
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        if (nodesBuilder_ == null) {
+          nodes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          nodesBuilder_.clear();
+        }
+        stored_ = false;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_KeyValueStoreReply_descriptor;
+      }
+
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply getDefaultInstanceForType() {
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply.getDefaultInstance();
+      }
+
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply build() {
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply buildPartial() {
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply result = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (nodesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            nodes_ = java.util.Collections.unmodifiableList(nodes_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.nodes_ = nodes_;
+        } else {
+          result.nodes_ = nodesBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.stored_ = stored_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply) {
+          return mergeFrom((com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply other) {
+        if (other == com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply.getDefaultInstance()) return this;
+        if (nodesBuilder_ == null) {
+          if (!other.nodes_.isEmpty()) {
+            if (nodes_.isEmpty()) {
+              nodes_ = other.nodes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureNodesIsMutable();
+              nodes_.addAll(other.nodes_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.nodes_.isEmpty()) {
+            if (nodesBuilder_.isEmpty()) {
+              nodesBuilder_.dispose();
+              nodesBuilder_ = null;
+              nodes_ = other.nodes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              nodesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getNodesFieldBuilder() : null;
+            } else {
+              nodesBuilder_.addAllMessages(other.nodes_);
+            }
+          }
+        }
+        if (other.hasStored()) {
+          setStored(other.getStored());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasStored()) {
+          return false;
+        }
+        for (int i = 0; i < getNodesCount(); i++) {
+          if (!getNodes(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> nodes_ =
+        java.util.Collections.emptyList();
+      private void ensureNodesIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          nodes_ = new java.util.ArrayList<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo>(nodes_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> nodesBuilder_;
+
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> getNodesList() {
+        if (nodesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(nodes_);
+        } else {
+          return nodesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public int getNodesCount() {
+        if (nodesBuilder_ == null) {
+          return nodes_.size();
+        } else {
+          return nodesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo getNodes(int index) {
+        if (nodesBuilder_ == null) {
+          return nodes_.get(index);
+        } else {
+          return nodesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public Builder setNodes(
+          int index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo value) {
+        if (nodesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureNodesIsMutable();
+          nodes_.set(index, value);
+          onChanged();
+        } else {
+          nodesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public Builder setNodes(
+          int index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder builderForValue) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          nodes_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          nodesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public Builder addNodes(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo value) {
+        if (nodesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureNodesIsMutable();
+          nodes_.add(value);
+          onChanged();
+        } else {
+          nodesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public Builder addNodes(
+          int index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo value) {
+        if (nodesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureNodesIsMutable();
+          nodes_.add(index, value);
+          onChanged();
+        } else {
+          nodesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public Builder addNodes(
+          com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder builderForValue) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          nodes_.add(builderForValue.build());
+          onChanged();
+        } else {
+          nodesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public Builder addNodes(
+          int index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder builderForValue) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          nodes_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          nodesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public Builder addAllNodes(
+          java.lang.Iterable<? extends com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> values) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, nodes_);
+          onChanged();
+        } else {
+          nodesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public Builder clearNodes() {
+        if (nodesBuilder_ == null) {
+          nodes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          nodesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public Builder removeNodes(int index) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          nodes_.remove(index);
+          onChanged();
+        } else {
+          nodesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder getNodesBuilder(
+          int index) {
+        return getNodesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder getNodesOrBuilder(
+          int index) {
+        if (nodesBuilder_ == null) {
+          return nodes_.get(index);  } else {
+          return nodesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public java.util.List<? extends com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> 
+           getNodesOrBuilderList() {
+        if (nodesBuilder_ != null) {
+          return nodesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(nodes_);
+        }
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder addNodesBuilder() {
+        return getNodesFieldBuilder().addBuilder(
+            com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder addNodesBuilder(
+          int index) {
+        return getNodesFieldBuilder().addBuilder(
+            index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .message.NodeInfo nodes = 10;</code>
+       */
+      public java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder> 
+           getNodesBuilderList() {
+        return getNodesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> 
+          getNodesFieldBuilder() {
+        if (nodesBuilder_ == null) {
+          nodesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder>(
+                  nodes_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          nodes_ = null;
+        }
+        return nodesBuilder_;
+      }
+
+      private boolean stored_ ;
+      /**
+       * <code>required bool stored = 11;</code>
+       */
+      public boolean hasStored() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required bool stored = 11;</code>
+       */
+      public boolean getStored() {
+        return stored_;
+      }
+      /**
+       * <code>required bool stored = 11;</code>
+       */
+      public Builder setStored(boolean value) {
+        bitField0_ |= 0x00000002;
+        stored_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bool stored = 11;</code>
+       */
+      public Builder clearStored() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        stored_ = false;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:message.KeyValueStoreReply)
+    }
+
+    // @@protoc_insertion_point(class_scope:message.KeyValueStoreReply)
+    private static final com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply();
+    }
+
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<KeyValueStoreReply>
+        PARSER = new com.google.protobuf.AbstractParser<KeyValueStoreReply>() {
+      public KeyValueStoreReply parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new KeyValueStoreReply(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<KeyValueStoreReply> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<KeyValueStoreReply> getParserForType() {
+      return PARSER;
+    }
+
+    public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.KeyValueStoreReply getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DataMessageOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:message.DataMessage)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>required bytes key = 10;</code>
+     */
+    boolean hasKey();
+    /**
+     * <code>required bytes key = 10;</code>
+     */
+    com.google.protobuf.ByteString getKey();
+
+    /**
+     * <code>required bytes value = 11;</code>
+     */
+    boolean hasValue();
+    /**
+     * <code>required bytes value = 11;</code>
+     */
+    com.google.protobuf.ByteString getValue();
+
+    /**
+     * <code>required int64 expirationTime = 12;</code>
+     */
+    boolean hasExpirationTime();
+    /**
+     * <code>required int64 expirationTime = 12;</code>
+     */
+    long getExpirationTime();
+
+    /**
+     * <code>optional int64 updateTime = 13;</code>
+     */
+    boolean hasUpdateTime();
+    /**
+     * <code>optional int64 updateTime = 13;</code>
+     */
+    long getUpdateTime();
+  }
+  /**
+   * Protobuf type {@code message.DataMessage}
+   */
+  public  static final class DataMessage extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:message.DataMessage)
+      DataMessageOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DataMessage.newBuilder() to construct.
+    private DataMessage(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DataMessage() {
+      key_ = com.google.protobuf.ByteString.EMPTY;
+      value_ = com.google.protobuf.ByteString.EMPTY;
+      expirationTime_ = 0L;
+      updateTime_ = 0L;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DataMessage(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 82: {
+              bitField0_ |= 0x00000001;
+              key_ = input.readBytes();
+              break;
+            }
+            case 90: {
+              bitField0_ |= 0x00000002;
+              value_ = input.readBytes();
+              break;
+            }
+            case 96: {
+              bitField0_ |= 0x00000004;
+              expirationTime_ = input.readInt64();
+              break;
+            }
+            case 104: {
+              bitField0_ |= 0x00000008;
+              updateTime_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_DataMessage_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_DataMessage_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int KEY_FIELD_NUMBER = 10;
+    private com.google.protobuf.ByteString key_;
+    /**
+     * <code>required bytes key = 10;</code>
+     */
+    public boolean hasKey() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes key = 10;</code>
+     */
+    public com.google.protobuf.ByteString getKey() {
+      return key_;
+    }
+
+    public static final int VALUE_FIELD_NUMBER = 11;
+    private com.google.protobuf.ByteString value_;
+    /**
+     * <code>required bytes value = 11;</code>
+     */
+    public boolean hasValue() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required bytes value = 11;</code>
+     */
+    public com.google.protobuf.ByteString getValue() {
+      return value_;
+    }
+
+    public static final int EXPIRATIONTIME_FIELD_NUMBER = 12;
+    private long expirationTime_;
+    /**
+     * <code>required int64 expirationTime = 12;</code>
+     */
+    public boolean hasExpirationTime() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int64 expirationTime = 12;</code>
+     */
+    public long getExpirationTime() {
+      return expirationTime_;
+    }
+
+    public static final int UPDATETIME_FIELD_NUMBER = 13;
+    private long updateTime_;
+    /**
+     * <code>optional int64 updateTime = 13;</code>
+     */
+    public boolean hasUpdateTime() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional int64 updateTime = 13;</code>
+     */
+    public long getUpdateTime() {
+      return updateTime_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (!hasKey()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasValue()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasExpirationTime()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(10, key_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(11, value_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(12, expirationTime_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(13, updateTime_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(10, key_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(11, value_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(12, expirationTime_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(13, updateTime_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage)) {
+        return super.equals(obj);
+      }
+      com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage other = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage) obj;
+
+      boolean result = true;
+      result = result && (hasKey() == other.hasKey());
+      if (hasKey()) {
+        result = result && getKey()
+            .equals(other.getKey());
+      }
+      result = result && (hasValue() == other.hasValue());
+      if (hasValue()) {
+        result = result && getValue()
+            .equals(other.getValue());
+      }
+      result = result && (hasExpirationTime() == other.hasExpirationTime());
+      if (hasExpirationTime()) {
+        result = result && (getExpirationTime()
+            == other.getExpirationTime());
+      }
+      result = result && (hasUpdateTime() == other.hasUpdateTime());
+      if (hasUpdateTime()) {
+        result = result && (getUpdateTime()
+            == other.getUpdateTime());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasKey()) {
+        hash = (37 * hash) + KEY_FIELD_NUMBER;
+        hash = (53 * hash) + getKey().hashCode();
+      }
+      if (hasValue()) {
+        hash = (37 * hash) + VALUE_FIELD_NUMBER;
+        hash = (53 * hash) + getValue().hashCode();
+      }
+      if (hasExpirationTime()) {
+        hash = (37 * hash) + EXPIRATIONTIME_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getExpirationTime());
+      }
+      if (hasUpdateTime()) {
+        hash = (37 * hash) + UPDATETIME_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getUpdateTime());
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code message.DataMessage}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:message.DataMessage)
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessageOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_DataMessage_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_DataMessage_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage.Builder.class);
+      }
+
+      // Construct using com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        key_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        value_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        expirationTime_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        updateTime_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_DataMessage_descriptor;
+      }
+
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage getDefaultInstanceForType() {
+        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage.getDefaultInstance();
+      }
+
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage build() {
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage buildPartial() {
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage result = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.key_ = key_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.value_ = value_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.expirationTime_ = expirationTime_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.updateTime_ = updateTime_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage) {
+          return mergeFrom((com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage other) {
+        if (other == com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage.getDefaultInstance()) return this;
+        if (other.hasKey()) {
+          setKey(other.getKey());
+        }
+        if (other.hasValue()) {
+          setValue(other.getValue());
+        }
+        if (other.hasExpirationTime()) {
+          setExpirationTime(other.getExpirationTime());
+        }
+        if (other.hasUpdateTime()) {
+          setUpdateTime(other.getUpdateTime());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasKey()) {
+          return false;
+        }
+        if (!hasValue()) {
+          return false;
+        }
+        if (!hasExpirationTime()) {
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes key = 10;</code>
+       */
+      public boolean hasKey() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes key = 10;</code>
+       */
+      public com.google.protobuf.ByteString getKey() {
+        return key_;
+      }
+      /**
+       * <code>required bytes key = 10;</code>
+       */
+      public Builder setKey(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        key_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes key = 10;</code>
+       */
+      public Builder clearKey() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        key_ = getDefaultInstance().getKey();
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes value = 11;</code>
+       */
+      public boolean hasValue() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required bytes value = 11;</code>
+       */
+      public com.google.protobuf.ByteString getValue() {
+        return value_;
+      }
+      /**
+       * <code>required bytes value = 11;</code>
+       */
+      public Builder setValue(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        value_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes value = 11;</code>
+       */
+      public Builder clearValue() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        value_ = getDefaultInstance().getValue();
+        onChanged();
+        return this;
+      }
+
+      private long expirationTime_ ;
+      /**
+       * <code>required int64 expirationTime = 12;</code>
+       */
+      public boolean hasExpirationTime() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int64 expirationTime = 12;</code>
+       */
+      public long getExpirationTime() {
+        return expirationTime_;
+      }
+      /**
+       * <code>required int64 expirationTime = 12;</code>
+       */
+      public Builder setExpirationTime(long value) {
+        bitField0_ |= 0x00000004;
+        expirationTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int64 expirationTime = 12;</code>
+       */
+      public Builder clearExpirationTime() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        expirationTime_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long updateTime_ ;
+      /**
+       * <code>optional int64 updateTime = 13;</code>
+       */
+      public boolean hasUpdateTime() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int64 updateTime = 13;</code>
+       */
+      public long getUpdateTime() {
+        return updateTime_;
+      }
+      /**
+       * <code>optional int64 updateTime = 13;</code>
+       */
+      public Builder setUpdateTime(long value) {
+        bitField0_ |= 0x00000008;
+        updateTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 updateTime = 13;</code>
+       */
+      public Builder clearUpdateTime() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        updateTime_ = 0L;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:message.DataMessage)
+    }
+
+    // @@protoc_insertion_point(class_scope:message.DataMessage)
+    private static final com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage();
+    }
+
+    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<DataMessage>
+        PARSER = new com.google.protobuf.AbstractParser<DataMessage>() {
+      public DataMessage parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DataMessage(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<DataMessage> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DataMessage> getParserForType() {
+      return PARSER;
+    }
+
+    public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.DataMessage getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2747,11 +4678,11 @@ public final class KademliaNetworkMessageProtocol {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required bytes kadid = 7;</code>
+     * <code>required bytes kadid = 10;</code>
      */
     boolean hasKadid();
     /**
-     * <code>required bytes kadid = 7;</code>
+     * <code>required bytes kadid = 10;</code>
      */
     com.google.protobuf.ByteString getKadid();
   }
@@ -2802,7 +4733,7 @@ public final class KademliaNetworkMessageProtocol {
               }
               break;
             }
-            case 58: {
+            case 82: {
               bitField0_ |= 0x00000001;
               kadid_ = input.readBytes();
               break;
@@ -2832,16 +4763,16 @@ public final class KademliaNetworkMessageProtocol {
     }
 
     private int bitField0_;
-    public static final int KADID_FIELD_NUMBER = 7;
+    public static final int KADID_FIELD_NUMBER = 10;
     private com.google.protobuf.ByteString kadid_;
     /**
-     * <code>required bytes kadid = 7;</code>
+     * <code>required bytes kadid = 10;</code>
      */
     public boolean hasKadid() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required bytes kadid = 7;</code>
+     * <code>required bytes kadid = 10;</code>
      */
     public com.google.protobuf.ByteString getKadid() {
       return kadid_;
@@ -2864,7 +4795,7 @@ public final class KademliaNetworkMessageProtocol {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(7, kadid_);
+        output.writeBytes(10, kadid_);
       }
       unknownFields.writeTo(output);
     }
@@ -2876,7 +4807,7 @@ public final class KademliaNetworkMessageProtocol {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(7, kadid_);
+          .computeBytesSize(10, kadid_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3151,19 +5082,19 @@ public final class KademliaNetworkMessageProtocol {
 
       private com.google.protobuf.ByteString kadid_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>required bytes kadid = 7;</code>
+       * <code>required bytes kadid = 10;</code>
        */
       public boolean hasKadid() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required bytes kadid = 7;</code>
+       * <code>required bytes kadid = 10;</code>
        */
       public com.google.protobuf.ByteString getKadid() {
         return kadid_;
       }
       /**
-       * <code>required bytes kadid = 7;</code>
+       * <code>required bytes kadid = 10;</code>
        */
       public Builder setKadid(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -3175,7 +5106,7 @@ public final class KademliaNetworkMessageProtocol {
         return this;
       }
       /**
-       * <code>required bytes kadid = 7;</code>
+       * <code>required bytes kadid = 10;</code>
        */
       public Builder clearKadid() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -3232,784 +5163,16 @@ public final class KademliaNetworkMessageProtocol {
 
   }
 
-  public interface PeerListMessageOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:message.PeerListMessage)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> 
-        getNodesList();
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo getNodes(int index);
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    int getNodesCount();
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    java.util.List<? extends com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> 
-        getNodesOrBuilderList();
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder getNodesOrBuilder(
-        int index);
-  }
-  /**
-   * Protobuf type {@code message.PeerListMessage}
-   */
-  public  static final class PeerListMessage extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:message.PeerListMessage)
-      PeerListMessageOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use PeerListMessage.newBuilder() to construct.
-    private PeerListMessage(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private PeerListMessage() {
-      nodes_ = java.util.Collections.emptyList();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private PeerListMessage(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 82: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                nodes_ = new java.util.ArrayList<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              nodes_.add(
-                  input.readMessage(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.PARSER, extensionRegistry));
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          nodes_ = java.util.Collections.unmodifiableList(nodes_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_PeerListMessage_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_PeerListMessage_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage.Builder.class);
-    }
-
-    public static final int NODES_FIELD_NUMBER = 10;
-    private java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> nodes_;
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    public java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> getNodesList() {
-      return nodes_;
-    }
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    public java.util.List<? extends com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> 
-        getNodesOrBuilderList() {
-      return nodes_;
-    }
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    public int getNodesCount() {
-      return nodes_.size();
-    }
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo getNodes(int index) {
-      return nodes_.get(index);
-    }
-    /**
-     * <code>repeated .message.NodeInfo nodes = 10;</code>
-     */
-    public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder getNodesOrBuilder(
-        int index) {
-      return nodes_.get(index);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      for (int i = 0; i < getNodesCount(); i++) {
-        if (!getNodes(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      for (int i = 0; i < nodes_.size(); i++) {
-        output.writeMessage(10, nodes_.get(i));
-      }
-      unknownFields.writeTo(output);
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      for (int i = 0; i < nodes_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, nodes_.get(i));
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage)) {
-        return super.equals(obj);
-      }
-      com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage other = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage) obj;
-
-      boolean result = true;
-      result = result && getNodesList()
-          .equals(other.getNodesList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (getNodesCount() > 0) {
-        hash = (37 * hash) + NODES_FIELD_NUMBER;
-        hash = (53 * hash) + getNodesList().hashCode();
-      }
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code message.PeerListMessage}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:message.PeerListMessage)
-        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessageOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_PeerListMessage_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_PeerListMessage_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage.class, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage.Builder.class);
-      }
-
-      // Construct using com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getNodesFieldBuilder();
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        if (nodesBuilder_ == null) {
-          nodes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          nodesBuilder_.clear();
-        }
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.internal_static_message_PeerListMessage_descriptor;
-      }
-
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage getDefaultInstanceForType() {
-        return com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage.getDefaultInstance();
-      }
-
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage build() {
-        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage buildPartial() {
-        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage result = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage(this);
-        int from_bitField0_ = bitField0_;
-        if (nodesBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
-            nodes_ = java.util.Collections.unmodifiableList(nodes_);
-            bitField0_ = (bitField0_ & ~0x00000001);
-          }
-          result.nodes_ = nodes_;
-        } else {
-          result.nodes_ = nodesBuilder_.build();
-        }
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage) {
-          return mergeFrom((com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage other) {
-        if (other == com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage.getDefaultInstance()) return this;
-        if (nodesBuilder_ == null) {
-          if (!other.nodes_.isEmpty()) {
-            if (nodes_.isEmpty()) {
-              nodes_ = other.nodes_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-            } else {
-              ensureNodesIsMutable();
-              nodes_.addAll(other.nodes_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.nodes_.isEmpty()) {
-            if (nodesBuilder_.isEmpty()) {
-              nodesBuilder_.dispose();
-              nodesBuilder_ = null;
-              nodes_ = other.nodes_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-              nodesBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getNodesFieldBuilder() : null;
-            } else {
-              nodesBuilder_.addAllMessages(other.nodes_);
-            }
-          }
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        for (int i = 0; i < getNodesCount(); i++) {
-          if (!getNodes(i).isInitialized()) {
-            return false;
-          }
-        }
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      private java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> nodes_ =
-        java.util.Collections.emptyList();
-      private void ensureNodesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          nodes_ = new java.util.ArrayList<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo>(nodes_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> nodesBuilder_;
-
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> getNodesList() {
-        if (nodesBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(nodes_);
-        } else {
-          return nodesBuilder_.getMessageList();
-        }
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public int getNodesCount() {
-        if (nodesBuilder_ == null) {
-          return nodes_.size();
-        } else {
-          return nodesBuilder_.getCount();
-        }
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo getNodes(int index) {
-        if (nodesBuilder_ == null) {
-          return nodes_.get(index);
-        } else {
-          return nodesBuilder_.getMessage(index);
-        }
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public Builder setNodes(
-          int index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo value) {
-        if (nodesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureNodesIsMutable();
-          nodes_.set(index, value);
-          onChanged();
-        } else {
-          nodesBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public Builder setNodes(
-          int index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder builderForValue) {
-        if (nodesBuilder_ == null) {
-          ensureNodesIsMutable();
-          nodes_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          nodesBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public Builder addNodes(com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo value) {
-        if (nodesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureNodesIsMutable();
-          nodes_.add(value);
-          onChanged();
-        } else {
-          nodesBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public Builder addNodes(
-          int index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo value) {
-        if (nodesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureNodesIsMutable();
-          nodes_.add(index, value);
-          onChanged();
-        } else {
-          nodesBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public Builder addNodes(
-          com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder builderForValue) {
-        if (nodesBuilder_ == null) {
-          ensureNodesIsMutable();
-          nodes_.add(builderForValue.build());
-          onChanged();
-        } else {
-          nodesBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public Builder addNodes(
-          int index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder builderForValue) {
-        if (nodesBuilder_ == null) {
-          ensureNodesIsMutable();
-          nodes_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          nodesBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public Builder addAllNodes(
-          java.lang.Iterable<? extends com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo> values) {
-        if (nodesBuilder_ == null) {
-          ensureNodesIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, nodes_);
-          onChanged();
-        } else {
-          nodesBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public Builder clearNodes() {
-        if (nodesBuilder_ == null) {
-          nodes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-          onChanged();
-        } else {
-          nodesBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public Builder removeNodes(int index) {
-        if (nodesBuilder_ == null) {
-          ensureNodesIsMutable();
-          nodes_.remove(index);
-          onChanged();
-        } else {
-          nodesBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder getNodesBuilder(
-          int index) {
-        return getNodesFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder getNodesOrBuilder(
-          int index) {
-        if (nodesBuilder_ == null) {
-          return nodes_.get(index);  } else {
-          return nodesBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public java.util.List<? extends com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> 
-           getNodesOrBuilderList() {
-        if (nodesBuilder_ != null) {
-          return nodesBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(nodes_);
-        }
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder addNodesBuilder() {
-        return getNodesFieldBuilder().addBuilder(
-            com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder addNodesBuilder(
-          int index) {
-        return getNodesFieldBuilder().addBuilder(
-            index, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .message.NodeInfo nodes = 10;</code>
-       */
-      public java.util.List<com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder> 
-           getNodesBuilderList() {
-        return getNodesFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder> 
-          getNodesFieldBuilder() {
-        if (nodesBuilder_ == null) {
-          nodesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfo.Builder, com.soriole.kademlia.network.KademliaNetworkMessageProtocol.NodeInfoOrBuilder>(
-                  nodes_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
-                  getParentForChildren(),
-                  isClean());
-          nodes_ = null;
-        }
-        return nodesBuilder_;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:message.PeerListMessage)
-    }
-
-    // @@protoc_insertion_point(class_scope:message.PeerListMessage)
-    private static final com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage();
-    }
-
-    public static com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<PeerListMessage>
-        PARSER = new com.google.protobuf.AbstractParser<PeerListMessage>() {
-      public PeerListMessage parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new PeerListMessage(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<PeerListMessage> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<PeerListMessage> getParserForType() {
-      return PARSER;
-    }
-
-    public com.soriole.kademlia.network.KademliaNetworkMessageProtocol.PeerListMessage getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
   public interface PingMessageOrBuilder extends
       // @@protoc_insertion_point(interface_extends:message.PingMessage)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required int32 random = 7;</code>
+     * <code>required int32 random = 10;</code>
      */
     boolean hasRandom();
     /**
-     * <code>required int32 random = 7;</code>
+     * <code>required int32 random = 10;</code>
      */
     int getRandom();
   }
@@ -4060,7 +5223,7 @@ public final class KademliaNetworkMessageProtocol {
               }
               break;
             }
-            case 56: {
+            case 80: {
               bitField0_ |= 0x00000001;
               random_ = input.readInt32();
               break;
@@ -4090,16 +5253,16 @@ public final class KademliaNetworkMessageProtocol {
     }
 
     private int bitField0_;
-    public static final int RANDOM_FIELD_NUMBER = 7;
+    public static final int RANDOM_FIELD_NUMBER = 10;
     private int random_;
     /**
-     * <code>required int32 random = 7;</code>
+     * <code>required int32 random = 10;</code>
      */
     public boolean hasRandom() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required int32 random = 7;</code>
+     * <code>required int32 random = 10;</code>
      */
     public int getRandom() {
       return random_;
@@ -4122,7 +5285,7 @@ public final class KademliaNetworkMessageProtocol {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt32(7, random_);
+        output.writeInt32(10, random_);
       }
       unknownFields.writeTo(output);
     }
@@ -4134,7 +5297,7 @@ public final class KademliaNetworkMessageProtocol {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(7, random_);
+          .computeInt32Size(10, random_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4409,19 +5572,19 @@ public final class KademliaNetworkMessageProtocol {
 
       private int random_ ;
       /**
-       * <code>required int32 random = 7;</code>
+       * <code>required int32 random = 10;</code>
        */
       public boolean hasRandom() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required int32 random = 7;</code>
+       * <code>required int32 random = 10;</code>
        */
       public int getRandom() {
         return random_;
       }
       /**
-       * <code>required int32 random = 7;</code>
+       * <code>required int32 random = 10;</code>
        */
       public Builder setRandom(int value) {
         bitField0_ |= 0x00000001;
@@ -4430,7 +5593,7 @@ public final class KademliaNetworkMessageProtocol {
         return this;
       }
       /**
-       * <code>required int32 random = 7;</code>
+       * <code>required int32 random = 10;</code>
        */
       public Builder clearRandom() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -4492,11 +5655,11 @@ public final class KademliaNetworkMessageProtocol {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required bytes messageBytes = 7;</code>
+     * <code>required bytes messageBytes = 10;</code>
      */
     boolean hasMessageBytes();
     /**
-     * <code>required bytes messageBytes = 7;</code>
+     * <code>required bytes messageBytes = 10;</code>
      */
     com.google.protobuf.ByteString getMessageBytes();
   }
@@ -4547,7 +5710,7 @@ public final class KademliaNetworkMessageProtocol {
               }
               break;
             }
-            case 58: {
+            case 82: {
               bitField0_ |= 0x00000001;
               messageBytes_ = input.readBytes();
               break;
@@ -4577,16 +5740,16 @@ public final class KademliaNetworkMessageProtocol {
     }
 
     private int bitField0_;
-    public static final int MESSAGEBYTES_FIELD_NUMBER = 7;
+    public static final int MESSAGEBYTES_FIELD_NUMBER = 10;
     private com.google.protobuf.ByteString messageBytes_;
     /**
-     * <code>required bytes messageBytes = 7;</code>
+     * <code>required bytes messageBytes = 10;</code>
      */
     public boolean hasMessageBytes() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required bytes messageBytes = 7;</code>
+     * <code>required bytes messageBytes = 10;</code>
      */
     public com.google.protobuf.ByteString getMessageBytes() {
       return messageBytes_;
@@ -4609,7 +5772,7 @@ public final class KademliaNetworkMessageProtocol {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(7, messageBytes_);
+        output.writeBytes(10, messageBytes_);
       }
       unknownFields.writeTo(output);
     }
@@ -4621,7 +5784,7 @@ public final class KademliaNetworkMessageProtocol {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(7, messageBytes_);
+          .computeBytesSize(10, messageBytes_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4896,19 +6059,19 @@ public final class KademliaNetworkMessageProtocol {
 
       private com.google.protobuf.ByteString messageBytes_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>required bytes messageBytes = 7;</code>
+       * <code>required bytes messageBytes = 10;</code>
        */
       public boolean hasMessageBytes() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required bytes messageBytes = 7;</code>
+       * <code>required bytes messageBytes = 10;</code>
        */
       public com.google.protobuf.ByteString getMessageBytes() {
         return messageBytes_;
       }
       /**
-       * <code>required bytes messageBytes = 7;</code>
+       * <code>required bytes messageBytes = 10;</code>
        */
       public Builder setMessageBytes(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -4920,7 +6083,7 @@ public final class KademliaNetworkMessageProtocol {
         return this;
       }
       /**
-       * <code>required bytes messageBytes = 7;</code>
+       * <code>required bytes messageBytes = 10;</code>
        */
       public Builder clearMessageBytes() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -4993,20 +6156,25 @@ public final class KademliaNetworkMessageProtocol {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_message_NodeList_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_message_ConnectMessage_descriptor;
+    internal_static_message_KeyValueStoreMessage_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_message_ConnectMessage_fieldAccessorTable;
+      internal_static_message_KeyValueStoreMessage_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_message_KeyValueStoreReply_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_message_KeyValueStoreReply_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_message_DataMessage_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_message_DataMessage_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_message_NodeLookupMessage_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_message_NodeLookupMessage_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_message_PeerListMessage_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_message_PeerListMessage_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_message_PingMessage_descriptor;
   private static final 
@@ -5032,13 +6200,17 @@ public final class KademliaNetworkMessageProtocol {
       "\030\004 \001(\003\022\023\n\013messageData\030\006 \001(\014\"8\n\010NodeInfo\022" +
       "\014\n\004port\030\007 \002(\005\022\017\n\007address\030\010 \002(\014\022\r\n\005kadid\030" +
       "\t \002(\014\",\n\010NodeList\022 \n\005nodes\030\n \003(\0132\021.messa" +
-      "ge.NodeInfo\"\020\n\016ConnectMessage\"\"\n\021NodeLoo" +
-      "kupMessage\022\r\n\005kadid\030\007 \002(\014\"3\n\017PeerListMes" +
-      "sage\022 \n\005nodes\030\n \003(\0132\021.message.NodeInfo\"\035" +
-      "\n\013PingMessage\022\016\n\006random\030\007 \002(\005\"\"\n\nRawMess" +
-      "age\022\024\n\014messageBytes\030\007 \002(\014B>\n\034com.soriole" +
-      ".kademlia.networkB\036KademliaNetworkMessag" +
-      "eProtocol"
+      "ge.NodeInfo\"J\n\024KeyValueStoreMessage\022\013\n\003k" +
+      "ey\030\n \002(\014\022\r\n\005value\030\013 \002(\014\022\026\n\016expirationTim" +
+      "e\030\014 \002(\003\"F\n\022KeyValueStoreReply\022 \n\005nodes\030\n" +
+      " \003(\0132\021.message.NodeInfo\022\016\n\006stored\030\013 \002(\010\"" +
+      "U\n\013DataMessage\022\013\n\003key\030\n \002(\014\022\r\n\005value\030\013 \002" +
+      "(\014\022\026\n\016expirationTime\030\014 \002(\003\022\022\n\nupdateTime" +
+      "\030\r \001(\003\"\"\n\021NodeLookupMessage\022\r\n\005kadid\030\n \002" +
+      "(\014\"\035\n\013PingMessage\022\016\n\006random\030\n \002(\005\"\"\n\nRaw" +
+      "Message\022\024\n\014messageBytes\030\n \002(\014B>\n\034com.sor" +
+      "iole.kademlia.networkB\036KademliaNetworkMe" +
+      "ssageProtocol"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5070,32 +6242,38 @@ public final class KademliaNetworkMessageProtocol {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_message_NodeList_descriptor,
         new java.lang.String[] { "Nodes", });
-    internal_static_message_ConnectMessage_descriptor =
+    internal_static_message_KeyValueStoreMessage_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_message_ConnectMessage_fieldAccessorTable = new
+    internal_static_message_KeyValueStoreMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_message_ConnectMessage_descriptor,
-        new java.lang.String[] { });
-    internal_static_message_NodeLookupMessage_descriptor =
+        internal_static_message_KeyValueStoreMessage_descriptor,
+        new java.lang.String[] { "Key", "Value", "ExpirationTime", });
+    internal_static_message_KeyValueStoreReply_descriptor =
       getDescriptor().getMessageTypes().get(4);
+    internal_static_message_KeyValueStoreReply_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_message_KeyValueStoreReply_descriptor,
+        new java.lang.String[] { "Nodes", "Stored", });
+    internal_static_message_DataMessage_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_message_DataMessage_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_message_DataMessage_descriptor,
+        new java.lang.String[] { "Key", "Value", "ExpirationTime", "UpdateTime", });
+    internal_static_message_NodeLookupMessage_descriptor =
+      getDescriptor().getMessageTypes().get(6);
     internal_static_message_NodeLookupMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_message_NodeLookupMessage_descriptor,
         new java.lang.String[] { "Kadid", });
-    internal_static_message_PeerListMessage_descriptor =
-      getDescriptor().getMessageTypes().get(5);
-    internal_static_message_PeerListMessage_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_message_PeerListMessage_descriptor,
-        new java.lang.String[] { "Nodes", });
     internal_static_message_PingMessage_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_message_PingMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_message_PingMessage_descriptor,
         new java.lang.String[] { "Random", });
     internal_static_message_RawMessage_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_message_RawMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_message_RawMessage_descriptor,

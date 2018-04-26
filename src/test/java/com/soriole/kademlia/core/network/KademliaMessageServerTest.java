@@ -6,6 +6,7 @@ import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.network.KademliaMessageServer;
+import com.soriole.kademlia.network.ServerShutdownException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class KademliaMessageServerTest extends KademliaMessageServer{
     }
 
     @Test
-    public void messageReceiveTest() throws IOException, InterruptedException, TimeoutException {
+    public void messageReceiveTest() throws ServerShutdownException, InterruptedException, TimeoutException, SocketException {
         // startAsync listening on current server.
         this.start();
 

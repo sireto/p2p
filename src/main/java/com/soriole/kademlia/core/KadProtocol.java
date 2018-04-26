@@ -2,10 +2,12 @@ package com.soriole.kademlia.core;
 
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
+import com.soriole.kademlia.core.store.TimeStampedData;
 import com.soriole.kademlia.network.ServerShutdownException;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 /**
  *
@@ -27,14 +29,14 @@ public interface KadProtocol<T1> {
 
 This is a primitive operation, not an iterative one.
      */
-    boolean store(Key key,T1 value);
+    int store(Key key, T1 value) throws  ServerShutdownException;
 
     /**
      * A FIND_VALUE RPC includes a B=160-bit key. If a corresponding value is present on the recipient, the associated data is returned. Otherwise the RPC is equivalent to a FIND_NODE and a set of k triples is returned.
 
      This is a primitive operation, not an iterative one.
      */
-    T1 findValue(Key key) throws KademliaException;
+    TimeStampedData<byte[]> findValue(Key key) throws NoSuchElementException, ServerShutdownException;
 
     /**
      * This RPC involves one node sending a PING messages to another, which presumably replies with a PONG.
@@ -70,6 +72,6 @@ This is a primitive operation, not an iterative one.
     boolean join(NodeInfo node);
 
     // used to join to a node with known ip:port but not the KadID
-    void join(InetSocketAddress address) throws KademliaException;
+    void join(InetSocketAddress address);
 
 }

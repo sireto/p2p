@@ -107,6 +107,9 @@ public class Key implements Serializable, Comparable {
 
     @Override
     public int compareTo(Object o) {
+        if(o==null){
+            return 1;
+        }
         if(o instanceof Key)
             return key.compareTo(((Key) o).key);
         throw new IllegalArgumentException("Type Key cannot be compared with "+o.getClass().getName());
