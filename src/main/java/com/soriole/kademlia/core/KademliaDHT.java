@@ -17,32 +17,18 @@ import java.util.concurrent.TimeoutException;
 
 public class KademliaDHT implements KadProtocol<byte[]> {
     private static final Logger LOGGER = LoggerFactory.getLogger(KademliaDHT.class);
-    public final ContactBucket bucket;
-    public final KademliaMessageServer server;
-    // KeyValueStore with 24 hours expiration time.
-    public static final long defaultExpirationTime = 1000 * 60 * 60;
-    public final KeyValueStore<byte[]> keyValueStore;
+    protected final ContactBucket bucket;
+    protected final KademliaMessageServer server;
+    // TimestampedStore with 24 hours expiration time.
+    static final long defaultExpirationTime = 1000 * 60 * 60;
+    protected final TimestampedStore<byte[]> timestampedStore;
 
-    public KademliaDHT(ContactBucket bucket, KademliaMessageServer server, KeyValueStore<byte[]> store) {
+    public KademliaDHT(ContactBucket bucket, KademliaMessageServer server, TimestampedStore<byte[]> store) {
         this.bucket = bucket;
         this.server = server;
-        this.keyValueStore = store;
-    }
-
-    /**
-     * The FIND_NODE RPC includes a 160-bit key. The recipient of the RPC returns up to k triples (IP address, port, nodeID) for the contacts that it knows to be closest to the key.
-     * <p>
-     * The recipient must return k triples if at all possible. It may only return fewer than k if it is returning all of the contacts that it has knowledge of.
-     * <p>
-     * This is a primitive operation, not an iterative one used internally for other operations
-     */
-    // a blocking method.
-    protected SortedSet<NodeInfo> findClosestNodes(Key key, NodeInfo info) throws TimeoutException, ServerShutdownException {
-
-        Message m = server.startQuery(info, new NodeLookupMessage(bucket.getLocalNode().getKey()));
-        SortedSet set= new TreeSet<NodeInfo>(new NodeInfoComparatorByDistance(key));
-        set.addAll(((NodeListMessage)m).nodes);
-        return set;
+        this.timestampedStore = store;
+        // ensure that theat the local SocketAddress is properly set.
+        this.bucket.getLocalNode().setLanAddress(server.getSocketAddress());
     }
 
     /**
@@ -74,7 +60,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             // remove all the queried nodes from the closestNodes list.
             nodesToQuery.removeAll(queriedNodes);
 
-            // create a message Receiver to store incoming messages
+            // create a message Receiver to put incoming messages
             // the receiver's done() function will return true when it receives the given no of messages.
             NodeListReceiver receiver = new NodeListReceiver(nodesToQuery.size());
 
@@ -119,6 +105,29 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         return internalFindClosestNodes(key, bucket.k);
     }
 
+    public KademliaDHT(Key localKey,KademliaConfig config) throws SocketException {
+
+        this.bucket = new ContactBucket(new NodeInfo(localKey),config.getKeyLength(),config.getK());
+        timestampedStore = new InMemoryByteStore(config.getKeyValueExpiryTime());
+        this.server = new KademliaMessageServer(config.getKadeliaProtocolPort(),bucket, timestampedStore);
+        this.server.setAlpha(config.getAlpha());
+        bucket.getLocalNode().setLanAddress(server.getSocketAddress());
+    }
+
+    /**
+     * The FIND_NODE RPC includes a 160-bit key. The recipient of the RPC returns up to k triples (IP address, port, nodeID) for the contacts that it knows to be closest to the key.
+     * <p>
+     * The recipient must return k triples if at all possible. It may only return fewer than k if it is returning all of the contacts that it has knowledge of.
+     * <p>
+     */
+    // a blocking method.
+    protected SortedSet<NodeInfo> findClosestNodes(Key key, NodeInfo info) throws TimeoutException, ServerShutdownException {
+
+        Message m = server.startQuery(info, new NodeLookupMessage(bucket.getLocalNode().getKey()));
+        SortedSet set= new TreeSet<NodeInfo>(new NodeInfoComparatorByDistance(key));
+        set.addAll(((NodeListMessage)m).nodes);
+        return set;
+    }
     @Override
     public SortedSet<NodeInfo> findClosestNodes(Key key) throws ServerShutdownException {
         // return the closest nodes.
@@ -126,11 +135,11 @@ public class KademliaDHT implements KadProtocol<byte[]> {
     }
 
     @Override
-    public int store(Key key, byte[] value) throws  ServerShutdownException {
-            return store(key,value,bucket.k);
+    public int put(Key key, byte[] value) throws  ServerShutdownException {
+            return put(key,value,bucket.k);
     }
 
-    public int store(Key key, byte[] value, int redundancy) throws ServerShutdownException {
+    public int put(Key key, byte[] value, int redundancy) throws ServerShutdownException {
 
         Collection<NodeInfo> nodes = internalFindClosestNodes(key, redundancy)[0];
         LOGGER.debug("Store("+key+") storing in these nodes :"+nodes);
@@ -152,9 +161,15 @@ public class KademliaDHT implements KadProtocol<byte[]> {
 
     }
 
+    public void putLocal(Key key,byte[] value){
+        this.timestampedStore.put(key,value);
+    }
+    public TimeStampedData<byte[]> getLocal(Key key){
+        return timestampedStore.get(key);
+    }
     @Override
-    public TimeStampedData<byte[]> findValue(Key key) throws NoSuchElementException,ServerShutdownException {
-        LOGGER.debug("findValue("+key+")");
+    public TimeStampedData<byte[]> get(Key key) throws NoSuchElementException,ServerShutdownException {
+        LOGGER.debug("get("+key+")");
         // the lists to track remaining nodes to query and queried nodes.
         Collection<NodeInfo> closestNodes = bucket.getClosestNodes(key);
         Collection<NodeInfo> queriedNodes = new HashSet<>();
@@ -163,24 +178,24 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         LookupMessage message = new LookupMessage();
         message.lookupKey = key;
 
-        // a sorted set to store all the returned data message in ascending order of updateTime.
+        // a sorted set to put all the returned data message in ascending order of updateTime.
         SortedSet<DataMessage> dataMessages = new TreeSet<>(DataMessage.getComparatorByUpdateTime());
 
         // while we have not queried the closest nodes, send messages.
         while (!nodesToQuery.isEmpty()) {
             queriedNodes.addAll(nodesToQuery);
             // send server with a lookup message
-            LOGGER.debug("findValue : Asking "+nodesToQuery);
+            LOGGER.debug("get : Asking "+nodesToQuery);
 
             for (Message m : server.startAsyncQueryAll(nodesToQuery, message)) {
                 // if replied message is a NodeListMessage, we update our nodesToQuery list.
                 if (m instanceof NodeListMessage) {
-                    LOGGER.debug("findValue : "+m.mSrcNodeInfo+" sent "+((NodeListMessage) m).nodes);
+                    LOGGER.debug("get : "+m.mSrcNodeInfo+" sent "+((NodeListMessage) m).nodes);
                     closestNodes.addAll(((NodeListMessage) m).nodes);
                 }
                 // hurrey, the node has the key.
                 else if (m instanceof DataMessage) {
-                    LOGGER.debug("findValue : "+m.mSrcNodeInfo+" sent us DataMessage");
+                    LOGGER.debug("get : "+m.mSrcNodeInfo+" sent us DataMessage");
                     dataMessages.add((DataMessage) m);
                 }
                 else{
@@ -192,7 +207,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             nodesToQuery.removeAll(queriedNodes);
         }
         // return the most latest value.
-        TimeStampedData<byte[]> local=keyValueStore.get(key);
+        TimeStampedData<byte[]> local= timestampedStore.get(key);
         if(local!=null) {
             if(!dataMessages.isEmpty() &&
                 local.getInsertionTime() > dataMessages.last().updatedtime    ){
@@ -204,17 +219,14 @@ public class KademliaDHT implements KadProtocol<byte[]> {
 
     }
 
-    // another blocking method that waits until the server returns.
+    // blocking method that waits until the server returns.
     @Override
     public long ping(NodeInfo node) {
         Date start = new Date();
         try {
             PingMessage m1 = new PingMessage();
-            PongMessage m2 = (PongMessage) server.startQuery(node, m1);
-            if (Arrays.equals(m1.writeToBytes(), m2.rawBytes)) {
-                // return time in milliseconds.
-                return new Date().getTime() - start.getTime();
-            }
+            server.startQuery(node, m1);
+            return new Date().getTime() - start.getTime();
 
         } catch (TimeoutException e) {
             e.printStackTrace();
@@ -298,17 +310,12 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         join(new NodeInfo(null, address));
     }
 
-    public static KademliaDHT getDefaultInstance(Key key,int port) throws SocketException {
-        NodeInfo localKey=new NodeInfo(key);
-        ContactBucket bucket=new ContactBucket(localKey,160,3);
-        KademliaMessageServer server=new KademliaMessageServer(port,bucket);
-        bucket.getLocalNode().setLanAddress(server.getSocketAddress());
-        return new KademliaDHT(bucket,server,new KeyValueStore<>(defaultExpirationTime));
-
-
-
-    }
-
+    public void shutDown(int timeSeconds) throws InterruptedException { this.server.shutDown(timeSeconds); }
+    public boolean stop(){ return this.server.stop(); }
+    public boolean start() throws SocketException { return this.server.start(); }
+    public NodeInfo getLocalNode(){ return bucket.getLocalNode(); }
+    public NodeInfo findNodeLocal(Key key){ return bucket.getNode(key); }
+    public Collection<NodeInfo> getRoutingTable(){ return bucket.getAllNodes(); }
 }
 
 

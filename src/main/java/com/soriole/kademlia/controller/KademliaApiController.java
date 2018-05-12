@@ -14,10 +14,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.websocket.server.PathParam;
-import java.io.IOException;
 import java.net.SocketException;
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping(value = "/api/kademlia/v1")
@@ -27,15 +26,10 @@ public class KademliaApiController {
     @Autowired
     KademliaService kademliaService;
 
-    @GetMapping(value = "/hello")
-    public String hello(){
-        return "Hello DHT";
-    }
-
     @GetMapping(value = "/start")
     public String start() {
         try {
-            if (kademliaService.getKademliaProtocol().server.start()) {
+            if (kademliaService.getDHT().start()) {
                 return "STARTED";
             } else {
                 LOGGER.info("Start command received but server is running");
@@ -50,7 +44,7 @@ public class KademliaApiController {
 
     @GetMapping(value = "/stop")
     public String stop() {
-        if(kademliaService.getKademliaProtocol().server.stop()){
+        if(kademliaService.getDHT().stop()){
            return "STOPPED";
         }
         else{
@@ -62,7 +56,7 @@ public class KademliaApiController {
     public NodeInfoCollectionBean getRoutingTable() {
         LOGGER.info("getRoutingTable()");
         Collection<NodeInfo> nodeInfos;
-        nodeInfos = kademliaService.getKademliaProtocol().bucket.getAllNodes();
+        nodeInfos = kademliaService.getDHT().getRoutingTable();
         NodeInfoBean[] parsedNodeInfos = new NodeInfoBean[nodeInfos.size()];
         int idx = 0;
         for (NodeInfo nodeInfo : nodeInfos) {
@@ -80,7 +74,7 @@ public class KademliaApiController {
             Key key = new Key(paramKey);
 
         Collection<NodeInfo> nodeInfos = null;
-        nodeInfos = kademliaService.getKademliaProtocol().findClosestNodes(key);
+        nodeInfos = kademliaService.getDHT().findClosestNodes(key);
 
         NodeInfoBean[] parsedNodeInfos = new NodeInfoBean[nodeInfos.size()];
         int idx = 0;
@@ -95,15 +89,15 @@ public class KademliaApiController {
 
     @GetMapping(value = "/key")
     public String getKey() {
-        return kademliaService.getKademliaProtocol().bucket.getLocalNode().getKey().toString();
+        return kademliaService.getDHT().getLocalNode().getKey().toString();
     }
 
 
     @GetMapping(value = "/store/{key}:{value}")
     public int store(@PathVariable("key") String paramKey, @PathVariable("value") String value){
         try {
-            this.kademliaService.getKademliaProtocol().keyValueStore.put(new Key(paramKey),value.getBytes());
-            return kademliaService.getKademliaProtocol().store(new Key(paramKey),value.getBytes())+1;
+            this.kademliaService.getDHT().put(new Key(paramKey),value.getBytes());
+            return kademliaService.getDHT().put(new Key(paramKey),value.getBytes())+1;
 
         }catch (ServerShutdownException e) {
             e.printStackTrace();
@@ -113,12 +107,20 @@ public class KademliaApiController {
 
     @GetMapping(value = "/fetch/{key}")
     public String fetch(@PathVariable("key") String paramKey){
-        return kademliaService.findValue(paramKey);
+        try {
+            return new String(kademliaService.getDHT().get(new Key(paramKey)).getData());
+        } catch (ServerShutdownException e) {
+            e.printStackTrace();
+        }
+        catch (NoSuchElementException e){
+            LOGGER.info("/fetch/"+paramKey+" : not found!");
+        }
+        return "Null";
     }
 
     @GetMapping(value = "/local/{key}")
     public String local(@PathVariable("key") String paramKey){
         // may be null.
-        return kademliaService.findLocal(paramKey);
+        return new String(kademliaService.getDHT().getLocal(new Key(paramKey)).getData());
     }
 }

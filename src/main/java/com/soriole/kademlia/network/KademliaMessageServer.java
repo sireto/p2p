@@ -7,7 +7,7 @@ import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.core.NodeInteractionListener;
-import com.soriole.kademlia.core.store.KeyValueStore;
+import com.soriole.kademlia.core.store.TimestampedStore;
 import com.soriole.kademlia.network.receivers.BulkMessageReceiver;
 import com.soriole.kademlia.network.receivers.MessageReceiver;
 import com.soriole.kademlia.network.server.SessionServer;
@@ -29,12 +29,12 @@ public class KademliaMessageServer extends SessionServer {
     int port;
     private static final int nThreadCount = 10;
     ExecutorService workerPool = null;
-    private KeyValueStore keyStore;
+    private TimestampedStore keyStore;
 
     public void setAlpha(int a) {
     }
 
-    public KademliaMessageServer(int listeningPort, ContactBucket bucket,ExecutorService service,KeyValueStore store) throws SocketException {
+    public KademliaMessageServer(int listeningPort, ContactBucket bucket,ExecutorService service,TimestampedStore store) throws SocketException {
         super(new DatagramSocket(listeningPort), bucket);
         nodeInteractionListener=getDefaultInteractionListener(bucket);
         this.workerPool=service;
@@ -50,7 +50,7 @@ public class KademliaMessageServer extends SessionServer {
         this(listeningPort, bucket,null);
     }
 
-    public KademliaMessageServer(int listeningPort, ContactBucket bucket,KeyValueStore store) throws SocketException {
+    public KademliaMessageServer(int listeningPort, ContactBucket bucket,TimestampedStore store) throws SocketException {
         this(listeningPort, bucket,null,store);
     }
 

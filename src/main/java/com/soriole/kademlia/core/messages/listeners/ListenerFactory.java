@@ -2,7 +2,7 @@ package com.soriole.kademlia.core.messages.listeners;
 
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.store.ContactBucket;
-import com.soriole.kademlia.core.store.KeyValueStore;
+import com.soriole.kademlia.core.store.TimestampedStore;
 import com.soriole.kademlia.network.KademliaMessageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class ListenerFactory {
      * @throws NoListenerException
      */
 
-    public static MessageListener getListener(Message message, ContactBucket bucket, KademliaMessageServer server, KeyValueStore store)
+    public static MessageListener getListener(Message message, ContactBucket bucket, KademliaMessageServer server, TimestampedStore store)
             throws NoListenerException {
         Class listenerClass = messageToListener.get(message.getClass());
         if(listenerClass==null){

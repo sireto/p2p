@@ -10,7 +10,7 @@ import java.util.Random;
  *
  * @author Grzegorz Milka
  */
-public class Key implements Serializable, Comparable {
+public class Key implements ByteSerializable, Comparable {
     public static final int KEY_LENGTH = 160;
     public static final int HEX = 16;
     private static final long serialVersionUID = 1L;
@@ -100,7 +100,7 @@ public class Key implements Serializable, Comparable {
         return key.toString(HEX);
     }
 
-
+    @Override
     public byte[] toBytes() {
         return this.key.toByteArray();
     }

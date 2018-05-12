@@ -5,11 +5,10 @@ import java.util.Comparator;
 import java.util.Date;
 
 /**
- * Class to store a DataType along with the creation Date,expiration Date
+ * Class to put a DataType along with the creation Date,expiration Date
  * @param <Type>
  */
 public class TimeStampedData<Type> {
-
     private Type data;
     private long insertionTime;
     private long expirationTime;

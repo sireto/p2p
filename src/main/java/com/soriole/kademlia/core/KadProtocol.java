@@ -25,18 +25,18 @@ public interface KadProtocol<T1> {
     Collection<NodeInfo> findClosestNodes(Key key) throws ServerShutdownException;
 
     /*
-    The sender of the STORE RPC provides a key and a block of data and requires that the recipient store the data and make it available for later retrieval by that key.
+    The sender of the STORE RPC provides a key and a block of data and requires that the recipient put the data and make it available for later retrieval by that key.
 
 This is a primitive operation, not an iterative one.
      */
-    int store(Key key, T1 value) throws  ServerShutdownException;
+    int put(Key key, T1 value) throws  ServerShutdownException;
 
     /**
      * A FIND_VALUE RPC includes a B=160-bit key. If a corresponding value is present on the recipient, the associated data is returned. Otherwise the RPC is equivalent to a FIND_NODE and a set of k triples is returned.
 
      This is a primitive operation, not an iterative one.
      */
-    TimeStampedData<byte[]> findValue(Key key) throws NoSuchElementException, ServerShutdownException;
+    TimeStampedData<byte[]> get(Key key) throws NoSuchElementException, ServerShutdownException;
 
     /**
      * This RPC involves one node sending a PING messages to another, which presumably replies with a PONG.

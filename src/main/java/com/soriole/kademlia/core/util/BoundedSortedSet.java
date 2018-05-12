@@ -8,7 +8,7 @@ import java.util.TreeSet;
  * when sorted in ascending order.
  *
  * This is used for finding closest nodes in kademlia routhing table.
- * @param <Type> Type of data to store.
+ * @param <Type> Type of data to put.
  */
 public class BoundedSortedSet<Type> extends TreeSet<Type>{
     int mUpperCountBound;

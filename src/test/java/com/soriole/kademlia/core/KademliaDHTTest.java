@@ -1,9 +1,6 @@
 package com.soriole.kademlia.core;
 
-import com.soriole.kademlia.core.store.ContactBucket;
-import com.soriole.kademlia.core.store.Key;
-import com.soriole.kademlia.core.store.KeyValueStore;
-import com.soriole.kademlia.core.store.NodeInfo;
+import com.soriole.kademlia.core.store.*;
 import com.soriole.kademlia.network.KademliaMessageServer;
 import com.soriole.kademlia.network.ServerShutdownException;
 import org.junit.Test;
@@ -41,10 +38,10 @@ public class KademliaDHTTest {
     private KademliaDHT createDHTinstance(Key key) throws SocketException {
         NodeInfo localKey = new NodeInfo(key);
         ContactBucket bucket = new ContactBucket(localKey, 160, 3);
-        KeyValueStore<byte[]> keyValueStore = new KeyValueStore<>(KademliaDHT.defaultExpirationTime);
-        KademliaMessageServer server = new KademliaMessageServer(0, bucket, service, keyValueStore);
+        TimestampedStore<byte[]> timestampedStore = new InMemoryByteStore(KademliaDHT.defaultExpirationTime);
+        KademliaMessageServer server = new KademliaMessageServer(0, bucket, service, timestampedStore);
         bucket.getLocalNode().setLanAddress(server.getSocketAddress());
-        return new KademliaDHT(bucket, server, keyValueStore);
+        return new KademliaDHT(bucket, server, timestampedStore);
     }
 
     public KademliaDHTTest() throws Exception {
@@ -171,7 +168,7 @@ public class KademliaDHTTest {
     }
 
 
-    // each node will store random (keys,value) in the network.
+    // each node will put random (keys,value) in the network.
     // we test that that all the stored keys are available from all the nodes in dht.
 
     @Test
@@ -197,8 +194,8 @@ public class KademliaDHTTest {
 
                 logger.debug(" Node " + (i + 1) + " storing  :" + rKey);
 
-                // store it them in the dht network and the verification Table.
-                dhts.get(i).store(rKey, bArray);
+                // put it them in the dht network and the verification Table.
+                dhts.get(i).put(rKey, bArray);
                 verificationTable.put(rKey, bArray);
 
                 logger.debug(" Done !!");
@@ -207,7 +204,7 @@ public class KademliaDHTTest {
 
             // print the stores of each Nodes in the network.
             for (int i = 0; i < dhts.size(); i++) {
-                logger.debug("Store of " + (i + 1) + " : " + dhts.get(i).keyValueStore);
+                logger.debug("Store of " + (i + 1) + " : " + dhts.get(i).timestampedStore);
             }
 
             int z = 1;
@@ -219,7 +216,7 @@ public class KademliaDHTTest {
                 for (int i = 0; i < dhts.size(); i++) {
                     byte[] found = null;
                     logger.info("(" + (i + 1) + "/" + z + "/" + dhts.size() + ")   Node " + dhts.get(i).bucket.getLocalNode() + " serching with key :" + k);
-                    found = dhts.get(i).findValue(k).getData();
+                    found = dhts.get(i).get(k).getData();
 
                     assertArrayEquals(found, target);
 
@@ -234,9 +231,9 @@ public class KademliaDHTTest {
         }
     }
 
-    // we store the fixed keys such that the store of each node is always same.
-    // we first verify that store and find are working
-    // then verify that the each of node's key,value store is as expected.
+    // we put the fixed keys such that the put of each node is always same.
+    // we first verify that put and find are working
+    // then verify that the each of node's key,value put is as expected.
     @Test
     public void store_Find_Value_2() throws ServerShutdownException, KademliaException {
         Random random = new Random();
@@ -249,8 +246,8 @@ public class KademliaDHTTest {
             // Node 20 stores Key(1) --  Node 19 stores Key(2) and so on.
             Key k = new Key(hex(dhts.size() - i));
 
-            // store the key and hex representation key, so that it's easy while debugging.
-            dhts.get(i).store(k, k.toBytes());
+            // put the key and hex representation key, so that it's easy while debugging.
+            dhts.get(i).put(k, k.toBytes());
 
             logger.debug(" Node " + (i + 1) + " stored  :" + k);
 
@@ -260,7 +257,7 @@ public class KademliaDHTTest {
         for (KademliaDHT dht : dhts) {
             for (int i = 0; i < dhts.size(); i++) {
                 Key key = new Key(hex(i + 1));
-                byte[] found = dht.findValue(key).getData();
+                byte[] found = dht.get(key).getData();
 
                 // the key and value should be equal
                 assertEquals(new Key(found), key);
@@ -269,14 +266,14 @@ public class KademliaDHTTest {
             }
             k++;
         }
-        //TODO: verify that store of each contact are as aspected.
+        //TODO: verify that put of each contact are as aspected.
         logKeyStores();
     }
 
     private void logKeyStores() {
         // print the stores of each Nodes in the network.
         for (int i = 0; i < dhts.size(); i++) {
-            logger.debug("Store of " + (i + 1) + " : " + dhts.get(i).keyValueStore);
+            logger.debug("Store of " + (i + 1) + " : " + dhts.get(i).timestampedStore);
         }
 
     }

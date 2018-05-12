@@ -79,7 +79,7 @@ public  abstract class SessionServer extends MessageServer {
 
                 } else {
                     // if nobody is waiting, it got to be handled by default Listeners.
-                    OnNewMessage(message);
+                    this.OnNewMessage(message);
                 }
             }
             catch (IOException e){

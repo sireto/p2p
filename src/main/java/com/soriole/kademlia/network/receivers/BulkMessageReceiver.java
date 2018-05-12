@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 
 /**
- * Receives and store (count) no of message
+ * Receives and put (count) no of message
  * And returns the list only after all the messages are either received or timeout has occcured.
- * TODO: Implement with a blocking queue so that messages can be processed without waiting for others.
+ * xTODO: Implement with a blocking queue so that messages can be processed without waiting for others.
  *
  * @author github.com/mesudip
  */

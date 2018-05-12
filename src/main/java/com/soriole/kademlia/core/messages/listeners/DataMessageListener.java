@@ -13,7 +13,7 @@ import java.util.Date;
 public class DataMessageListener extends MessageListener{
     static Logger logger= LoggerFactory.getLogger(DataMessageListener.class.getSimpleName());
 
-    // on receiving a DataMessage, we store the data.
+    // on receiving a DataMessage, we put the data.
     @Override
     public void onReceive(Message m) throws Exception {
         DataMessage message=(DataMessage) m;
