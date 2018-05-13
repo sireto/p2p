@@ -1,0 +1,52 @@
+syntax = "proto2";
+package message;
+
+option java_package = "com.soriole.kademlia.network";
+option java_outer_classname = "KademliaNetworkMessageProtocol";
+
+
+message Message {
+    // messageEncoding version
+    required bytes sender = 1;
+    optional bytes receiver = 2;
+    required int32 type=3;
+    optional int64 sessionId=4;
+    optional bytes messageData=6;
+}
+// this messages DataMessage will be converted to bytes while keeping inside messages
+message NodeInfo{
+    required int32 port=7;
+    required bytes address=8;
+    required bytes kadid=9;
+}
+
+message NodeList{
+    repeated NodeInfo nodes=10;
+}
+message KeyValueStoreMessage{
+    required bytes key=10;
+    required bytes value=11;
+    required int64 expirationTime=12;
+}
+message KeyValueStoreReply {
+    repeated NodeInfo nodes=10;
+    required bool stored=11;
+
+}
+message DataMessage{
+    required bytes key=10;
+    required bytes value=11;
+    required int64 expirationTime=12;
+    optional int64 updateTime=13;
+
+}
+message NodeLookupMessage {
+    required bytes kadid=10;
+}
+
+message PingMessage {
+    required int32 random=10;
+}
+message RawMessage {
+    required bytes messageBytes=10;
+}
