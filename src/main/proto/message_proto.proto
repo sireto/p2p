@@ -1,0 +1,20 @@
+syntax = "proto2";
+package message;
+
+option java_package = "com.reversehash.communication";
+option java_outer_classname = "MessageSerializationProtocol";
+
+message Message {
+    // messageEncoding version
+    required bytes sender = 2;
+    optional bytes receiver = 3;
+    required int32 index=4;
+    optional bytes messageByte=5;
+    required bytes checksum = 6;
+}
+// this messages DataMessage will be converted to bytes while keeping inside messages
+message MessageData{
+    required int32 version = 1;
+    optional int32 type=3;
+    optional bytes message=2;
+}

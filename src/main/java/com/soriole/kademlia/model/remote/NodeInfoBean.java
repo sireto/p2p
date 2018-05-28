@@ -1,7 +1,7 @@
 package com.soriole.kademlia.model.remote;
 
-import com.soriole.kademlia.core.Key;
-import com.soriole.kademlia.core.NodeInfo;
+import com.soriole.kademlia.core.store.Key;
+import com.soriole.kademlia.core.store.NodeInfo;
 
 import java.net.InetSocketAddress;
 
@@ -12,7 +12,7 @@ public final class NodeInfoBean {
 
   public static NodeInfoBean fromNodeInfo(NodeInfo info) {
     NodeInfoBean bean = new NodeInfoBean();
-    bean.setKey(info.getKey().toInt().toString(Key.HEX));
+    bean.setKey(info.getKey().toString());
     bean.setInetAddress(info.getLanAddress().getHostName());
     bean.setPort(info.getLanAddress().getPort());
     return bean;
