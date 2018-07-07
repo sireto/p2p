@@ -7,7 +7,6 @@ import com.soriole.kademlia.network.ServerShutdownException;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.NoSuchElementException;
 
 /**
  *
@@ -17,6 +16,7 @@ import java.util.NoSuchElementException;
  *x`
  */
 public interface KadProtocol<T1> {
+    static public class ContentNotFoundException extends Exception{}
 
     /**
      * Iterative query that findsClosestNodes to a given key.
@@ -36,7 +36,7 @@ This is a primitive operation, not an iterative one.
 
      This is a primitive operation, not an iterative one.
      */
-    TimeStampedData<byte[]> get(Key key) throws NoSuchElementException, ServerShutdownException;
+    TimeStampedData<byte[]> get(Key key) throws ContentNotFoundException, ServerShutdownException;
 
     /**
      * This RPC involves one node sending a PING messages to another, which presumably replies with a PONG.

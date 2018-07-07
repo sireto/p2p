@@ -55,7 +55,7 @@
 			<version>0.9.9-RC1</version>
 			<exclusions>
                 <!--This library version conflicts with another version
-                used by the hibernate-core library. excluding it and
+                used by the hibernate-security library. excluding it and
                 using another version works fine.
                 -->
 				<exclusion>

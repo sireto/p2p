@@ -45,11 +45,16 @@ public class KademliaExtendedDHT extends KademliaDHT {
         NonKademliaMessage msg=new NonKademliaMessage();
         msg.rawBytes=message;
         server.sendMessage(toNode(key),msg);
-
-
     }
-    public byte[] queryWithNode(Key key,byte[] message) throws TimeoutException, NoSuchNodeFoundException,ServerShutdownException {
+    public void sendMessageToNode(Key key, long sessionId, byte[]message) throws NoSuchNodeFoundException, ServerShutdownException, IOException {
         NonKademliaMessage msg=new NonKademliaMessage();
+        msg.rawBytes=message;
+        msg.sessionId=sessionId;
+        server.sendMessage(toNode(key),msg);
+    }
+    public byte[] queryWithNode(Key key, long sessionId, byte[] message) throws TimeoutException, NoSuchNodeFoundException,ServerShutdownException {
+        NonKademliaMessage msg=new NonKademliaMessage();
+        msg.sessionId=sessionId;
         msg.rawBytes=message;
         NonKademliaMessage m= (NonKademliaMessage) server.startQuery(toNode(key),msg);
         if(m==null){
@@ -57,6 +62,9 @@ public class KademliaExtendedDHT extends KademliaDHT {
             throw new TimeoutException();
         }
         return m.rawBytes;
+    }
+    public byte[] queryWithNode(Key key,byte[] message) throws NoSuchNodeFoundException, ServerShutdownException, TimeoutException {
+        return queryWithNode(key,0,message);
     }
     public void queryWithNodeAsync(Key key, byte[] message, ByteListener listener) throws NoSuchNodeFoundException, ServerShutdownException, TimeoutException {
         NonKademliaMessage msg=new NonKademliaMessage();

@@ -1,5 +1,6 @@
 package com.soriole.kademlia.network;
 
+import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.listeners.ListenerFactory;
 import com.soriole.kademlia.core.messages.listeners.MessageListener;
@@ -42,6 +43,11 @@ public class KademliaMessageServer extends SessionServer {
         this.keyStore=store;
 
     }
+    public KademliaMessageServer(ContactBucket bucket, ExecutorService service, TimestampedStore store, KademliaConfig config) throws SocketException {
+        this(config.getKadeliaProtocolPort(),bucket,service,store);
+
+    }
+
 
     // this method was used when the kademlia DHT didn't had implementation of storage.
     // this will be removed in future refactor.
@@ -135,7 +141,6 @@ public class KademliaMessageServer extends SessionServer {
                 msgReceiver.onReceive(super.query(message));
                 return;
             } catch (TimeoutException e) {
-                e.printStackTrace();
             } catch (ServerShutdownException e) {
                 e.printStackTrace();
             }
@@ -187,7 +192,9 @@ public class KademliaMessageServer extends SessionServer {
      * @return True if server begins starts , False if server was already running
      * @throws SocketException
      */
-
+    public void submitTask(Runnable task){
+        this.workerPool.submit(task);
+    }
     public boolean start() throws SocketException {
         if (this.workerPool == null) {
             this.workerPool = Executors.newFixedThreadPool(nThreadCount);

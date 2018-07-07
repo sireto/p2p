@@ -2,6 +2,7 @@ package com.soriole.kademlia.core.store;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Base64;
 import java.util.BitSet;
 import java.util.Random;
 
@@ -97,7 +98,7 @@ public class Key implements ByteSerializable, Comparable {
 
     @Override
     public String toString() {
-        return key.toString(HEX);
+        return Base64.getEncoder().encodeToString(key.toByteArray());
     }
 
     @Override

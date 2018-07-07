@@ -26,14 +26,15 @@ import java.util.Arrays;
  * The tasks performed by this server are:
  *  <ol>
  *      <li>read datagram and from DatagramServer and convert them to subclasses of Message. </li>
- *      <li>check the sender if it's in kademliaBucket and try to insert it.</li>
+ *      <li>check the sender if it's in kademliaBucket and try to insert it if it's not.</li>
  *      <li>check for the change of network address of the sender and inform it to upper layer.</li>
- *      <li></li>
- *
  *  </ol>
  */
+
 abstract class MessageServer extends DataGramServer {
+
     static private Logger logger = LoggerFactory.getLogger(MessageServer.class);
+
     protected ContactBucket bucket;
 
     protected MessageServer(DatagramSocket socket, ContactBucket bucket) {
@@ -78,7 +79,7 @@ abstract class MessageServer extends DataGramServer {
         try {
             message = MessageFactory.createMessage(messageProto.getType());
         } catch (Exception e){
-            logger.warn("MessageFactory.createMessage failed for type "+String.valueOf(messageProto.getType()));
+            logger.warn("MessageFactory.createMessageInstance failed for type "+String.valueOf(messageProto.getType()));
         }
 
         // get The sender's identifier key
@@ -90,10 +91,7 @@ abstract class MessageServer extends DataGramServer {
         // if the message has set session id, set it.
         if (messageProto.hasSessionId()) {
             message.sessionId = messageProto.getSessionId();
-        } else {
-            message.sessionId = 0;
         }
-
         // if the receiver is set, fill the receiver value
         if (messageProto.hasReceiver()) {
             message.mDestNodeInfo = bucket.getNode(new Key(messageProto.getReceiver().toByteArray()));
@@ -114,23 +112,29 @@ abstract class MessageServer extends DataGramServer {
             message.readFromBytes(messageProto.getMessageData().toByteArray());
         }
 
-        // Check if the sender is already is in out kademlia bucket.
-        NodeInfo bucketNode = bucket.getNode(senderKey);
-        // if this node is not present in the bucket
-        if (bucketNode == null) {
-            // try to put it into the bucket
-            if (!bucket.putNode(message.mSrcNodeInfo)) {
-                // if we cannot put it into the bucket we need to notify for furthur action
-                onNewNodeFound(message.mSrcNodeInfo.clone());
+        // sessionId=1 is the session value used by the clients to access kademlia features.
+        if(message.sessionId!=1) {
+            // Check if the sender is already is in out kademlia bucket.
+            NodeInfo bucketNode = bucket.getNode(senderKey);
+            // if this node is not present in the bucket
+            if (bucketNode == null) {
+                // try to put it into the bucket
+                if (!bucket.putNode(message.mSrcNodeInfo)) {
+                    // if we cannot put it into the bucket we need to notify for furthur action
+                    onNewNodeFound(message.mSrcNodeInfo.clone());
+                }
+                return message;
             }
-        }
-        // if the contact is already in the kademlia bucket, check if the address is same.
-        // if the address is changed, we might or might need to do some extra tasks.
-        // TODO: may not be appropriate if it's a forwarded message without onion layer.
-        else if (!message.mSrcNodeInfo.getLanAddress().equals(bucketNode.getLanAddress())) {
-            onNetworkAddressChange(senderKey, (InetSocketAddress) packet.getSocketAddress());
+            // if the contact is already in the kademlia bucket, check if the address is same.
+            // if the address is changed, we might or might need to do some extra tasks.
+            // TODO: may not be appropriate if it's a forwarded message without onion layer.
+            else if (!message.mSrcNodeInfo.getLanAddress().equals(bucketNode.getLanAddress())) {
+                onNetworkAddressChange(senderKey, (InetSocketAddress) packet.getSocketAddress());
+            }
+            bucket.putNode(message.mSrcNodeInfo);
         }
         return message;
+
     }
 
     protected abstract void onNetworkAddressChange(Key senderKey, InetSocketAddress newSocketAddress);
@@ -138,6 +142,5 @@ abstract class MessageServer extends DataGramServer {
     protected abstract void onNewNodeFound(NodeInfo info);
 
     protected abstract void onNewForwardMessage(Message message,NodeInfo destination);
-
 
 }

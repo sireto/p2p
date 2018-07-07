@@ -48,10 +48,10 @@ public class KademliaDHTTest {
         for (int i = 0; i < N_DHTS; i++) {
 
             // kademlia id of i'th dht = valueof(i)
-            dhts.add(createDHTinstance(new Key(hex(i+1))));
+            dhts.add(createDHTinstance(new Key(hex(i + 1))));
             dhts.get(i).server.start();
         }
-
+        Thread.sleep(1000);
         join();
 
     }
@@ -60,6 +60,7 @@ public class KademliaDHTTest {
     /**
      * Join each nodes with the bootstrap node.
      * 1st node in the list is the bootstrap node.
+     *
      * @throws Exception
      */
     public void join() throws Exception {
@@ -78,6 +79,7 @@ public class KademliaDHTTest {
     /**
      * Each Node tries  finding ClosestNode to each other nodes in the DHT network
      * No of call to findClosestNodes() = (N_DHT-1)^2
+     *
      * @throws Exception
      */
 
@@ -115,7 +117,8 @@ public class KademliaDHTTest {
     }
 
     /**
-     *  Each node tries to ping all the nodes in it's kademlia bucket
+     * Each node tries to ping all the nodes in it's kademlia bucket
+     *
      * @throws Exception
      */
 
@@ -172,63 +175,60 @@ public class KademliaDHTTest {
     // we test that that all the stored keys are available from all the nodes in dht.
 
     @Test
-    public void store_Find_Value_1() throws ServerShutdownException, KademliaException {
-        try {
-            Random random = new Random();
-            HashMap<Key, byte[]> verificationTable = new HashMap<>();
-            logger.debug("\n############## Find Value Test ##############");
+    public void store_Find_Value_1() throws ServerShutdownException, KademliaException, KadProtocol.ContentNotFoundException {
 
-            HashSet<Key> randomkeys = new HashSet<>();
-            // each puts 1  unique key in the dht network for test.
-            while (randomkeys.size() != dhts.size()) {
+        Random random = new Random();
+        HashMap<Key, byte[]> verificationTable = new HashMap<>();
+        logger.debug("\n############## Find Value Test ##############");
 
-                randomkeys.add(new Key(Long.toHexString(random.nextLong())));
-            }
-            Iterator<Key> keys = randomkeys.iterator();
-            // first, each dhtNode stores a random key and value to the dht
-            for (int i = 0; i < dhts.size(); i++) {
-                Key rKey = keys.next();
-                // create a random key and value
-                byte[] bArray = new byte[8];
-                random.nextBytes(bArray);
+        HashSet<Key> randomkeys = new HashSet<>();
+        // each puts 1  unique key in the dht network for test.
+        while (randomkeys.size() != dhts.size()) {
 
-                logger.debug(" Node " + (i + 1) + " storing  :" + rKey);
-
-                // put it them in the dht network and the verification Table.
-                dhts.get(i).put(rKey, bArray);
-                verificationTable.put(rKey, bArray);
-
-                logger.debug(" Done !!");
-
-            }
-
-            // print the stores of each Nodes in the network.
-            for (int i = 0; i < dhts.size(); i++) {
-                logger.debug("Store of " + (i + 1) + " : " + dhts.get(i).timestampedStore);
-            }
-
-            int z = 1;
-            for (Key k : verificationTable.keySet()) {
-
-                byte[] target = verificationTable.get(k);
-                //  find the value using dht's algorighm.
-                // make sure that each stored key is visible to each nodes in the network.
-                for (int i = 0; i < dhts.size(); i++) {
-                    byte[] found = null;
-                    logger.info("(" + (i + 1) + "/" + z + "/" + dhts.size() + ")   Node " + dhts.get(i).bucket.getLocalNode() + " serching with key :" + k);
-                    found = dhts.get(i).get(k).getData();
-
-                    assertArrayEquals(found, target);
-
-                }
-                z++;
-            }
-            logKeyStores();
+            randomkeys.add(new Key(Long.toHexString(random.nextLong())));
         }
-        catch (Exception e){
-            logKeyStores();
-            throw e;
+        Iterator<Key> keys = randomkeys.iterator();
+        // first, each dhtNode stores a random key and value to the dht
+        for (int i = 0; i < dhts.size(); i++) {
+            Key rKey = keys.next();
+            // create a random key and value
+            byte[] bArray = new byte[8];
+            random.nextBytes(bArray);
+
+            logger.debug(" Node " + (i + 1) + " storing  :" + rKey);
+
+            // put it them in the dht network and the verification Table.
+            dhts.get(i).put(rKey, bArray);
+            verificationTable.put(rKey, bArray);
+
+            logger.debug(" Done !!");
+
         }
+
+        // print the stores of each Nodes in the network.
+        for (int i = 0; i < dhts.size(); i++) {
+            logger.debug("Store of " + (i + 1) + " : " + dhts.get(i).timestampedStore);
+        }
+
+        int z = 1;
+        for (Key k : verificationTable.keySet()) {
+
+            byte[] target = verificationTable.get(k);
+            //  find the value using dht's algorighm.
+            // make sure that each stored key is visible to each nodes in the network.
+            for (int i = 0; i < dhts.size(); i++) {
+                byte[] found = null;
+                logger.info("(" + (i + 1) + "/" + z + "/" + dhts.size() + ")   Node " + dhts.get(i).bucket.getLocalNode() + " serching with key :" + k);
+                found = dhts.get(i).get(k).getData();
+
+                assertArrayEquals(found, target);
+
+            }
+            z++;
+        }
+        logKeyStores();
+
+
     }
 
     // we put the fixed keys such that the put of each node is always same.
@@ -257,7 +257,12 @@ public class KademliaDHTTest {
         for (KademliaDHT dht : dhts) {
             for (int i = 0; i < dhts.size(); i++) {
                 Key key = new Key(hex(i + 1));
-                byte[] found = dht.get(key).getData();
+                byte[] found = new byte[0];
+                try {
+                    found = dht.get(key).getData();
+                } catch (KadProtocol.ContentNotFoundException e) {
+                    e.printStackTrace();
+                }
 
                 // the key and value should be equal
                 assertEquals(new Key(found), key);

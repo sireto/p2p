@@ -58,7 +58,7 @@ public  abstract class SessionServer extends MessageServer {
             return incomingMessageTable.get(sessionId);
         } catch (IOException e) {
             incomingMessageTable.getIfExists(sessionId);
-            throw new ServerShutdownException();
+            throw new ServerShutdownException(e.getClass().getName()+" --> "+e.getMessage());
         }
     }
 
@@ -98,8 +98,9 @@ public  abstract class SessionServer extends MessageServer {
             }
         }
     }
-    protected void stopListening(){
+    synchronized protected void stopListening(){
        this.socket.close();
+       listening=false;
     }
     abstract protected void OnNewMessage(Message message);
 }
