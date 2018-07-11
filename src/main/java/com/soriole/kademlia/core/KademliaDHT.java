@@ -3,9 +3,10 @@ package com.soriole.kademlia.core;
 import com.soriole.kademlia.core.messages.*;
 import com.soriole.kademlia.core.store.*;
 import com.soriole.kademlia.core.util.NodeInfoComparatorByDistance;
-import com.soriole.kademlia.network.KademliaMessageServer;
-import com.soriole.kademlia.network.receivers.MessageReceiver;
-import com.soriole.kademlia.network.ServerShutdownException;
+import com.soriole.kademlia.core.network.MessageDispacher;
+import com.soriole.kademlia.core.network.server.udp.KademliaServer;
+import com.soriole.kademlia.core.network.receivers.MessageReceiver;
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,20 +19,20 @@ import java.util.concurrent.TimeoutException;
 public class KademliaDHT implements KadProtocol<byte[]> {
     private static final Logger LOGGER = LoggerFactory.getLogger(KademliaDHT.class);
     protected final ContactBucket bucket;
-    protected final KademliaMessageServer server;
+    protected final MessageDispacher server;
     // TimestampedStore with 24 hours expiration time.
     static final long defaultExpirationTime = 1000 * 60 * 60;
     static final long defaultNodeExpirationTime = 1000 * 35;
     private Thread bucketValidationThread;
     private Thread udpPunctureThread;
-    protected final TimestampedStore<byte[]> timestampedStore;
+    final TimestampedStore<byte[]> timestampedStore;
 
-    public KademliaDHT(ContactBucket bucket, KademliaMessageServer server, TimestampedStore<byte[]> store) {
+    public KademliaDHT(ContactBucket bucket, MessageDispacher server, TimestampedStore<byte[]> store, KademliaConfig config) {
         this.bucket = bucket;
         this.server = server;
         this.timestampedStore = store;
         // ensure that theat the local SocketAddress is properly set.
-        this.bucket.getLocalNode().setLanAddress(server.getSocketAddress());
+        this.bucket.getLocalNode().setLanAddress(server.getUsedSocketAddress());
     }
 
     /**
@@ -62,31 +63,21 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             // remove all the queried nodes from the closestNodes list.
             nodesToQuery.removeAll(queriedNodes);
 
-            // create a message Receiver to put incoming messages
-            // the receiver's done() function will return true when it receives the given no of messages.
-            NodeListReceiver receiver = new NodeListReceiver(nodesToQuery.size());
-
-            // send anynchronous request to each nodes in the list.
-            for (NodeInfo info : nodesToQuery) {
-                server.startQueryAsync(info, new NodeLookupMessage(key), receiver);
-            }
-            // wiat for all the replies.
-            synchronized (receiver) {
-                while (!receiver.done()) {
-                    try {
-                        receiver.wait();
-                    } catch (InterruptedException e) {
-                        //ignore.
-                    }
+            // send anynchronous request to each nodes in the list and collect result.
+            for (Message reply : server.startAsyncQueryAll(nodesToQuery, new NodeLookupMessage(key))) {
+                if (reply instanceof NodeListMessage) {
+                    closestNodes.addAll(((NodeListMessage) reply).nodes);
+                    allFoundNodes.addAll(((NodeListMessage) reply).nodes);
+                } else {
+                    LOGGER.warn("internalFindClosestNodes : Invalid response of NodeLookupMessage");
                 }
             }
+
             // add all the nodes to the queried nodes list.
             queriedNodes.addAll(nodesToQuery);
 
             // add all the founded nodes into the closest nodes.
-            closestNodes.addAll(receiver.foundNodes());
 
-            allFoundNodes.addAll(receiver.foundNodes());
             // if we have found the looked key, we can break the loop.
             if (closestNodes.first().getKey().equals(key)) {
                 break;
@@ -111,9 +102,8 @@ public class KademliaDHT implements KadProtocol<byte[]> {
 
         this.bucket = new ContactBucket(new NodeInfo(localKey), config.getKeyLength(), config.getK());
         timestampedStore = new InMemoryByteStore(config.getKeyValueExpiryTime());
-        this.server = new KademliaMessageServer(config.getKadeliaProtocolPort(), bucket, timestampedStore);
-        this.server.setAlpha(config.getAlpha());
-        bucket.getLocalNode().setLanAddress(server.getSocketAddress());
+        this.server = new KademliaServer(config.getKadeliaProtocolPort(), bucket, timestampedStore);
+        bucket.getLocalNode().setLanAddress(server.getUsedSocketAddress());
     }
 
     /**
@@ -123,7 +113,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
      * <p>
      */
     // a blocking method.
-    protected SortedSet<NodeInfo> findClosestNodes(Key key, NodeInfo info) throws TimeoutException, ServerShutdownException {
+    protected SortedSet<NodeInfo> findClosestNodes(Key key, NodeInfo info) throws TimeoutException, ServerShutdownException, IOException {
 
         Message m = server.startQuery(info, new NodeLookupMessage(bucket.getLocalNode().getKey()));
         SortedSet set = new TreeSet<NodeInfo>(new NodeInfoComparatorByDistance(key));
@@ -245,6 +235,8 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             LOGGER.warn("Time out while pinging :" + node.getKey() + " -> " + node.getLanAddress().toString());
         } catch (ServerShutdownException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         // we can remove this node from the DHT.
         return -1;
@@ -267,7 +259,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
     // returns Node info if the node is found else returns null.
     public NodeInfo findNode(Key key) throws ServerShutdownException {
         // get node from our bucket.
-        NodeInfo info = bucket.getNode(key);
+        NodeInfo info = findNodeLocal(key);
 
         if (info != null) {
             return info;
@@ -314,7 +306,11 @@ public class KademliaDHT implements KadProtocol<byte[]> {
                 // ping each of the nodes we have not contacted yet.
                 // ignore the pong reply.
                 // this won't wait for the server to send the reply.
-                server.sendMessage(info, new PingMessage());
+                try {
+                    server.sendMessage(info, new PingMessage());
+                } catch (TimeoutException e) {
+                    //ignore
+                }
             }
         } catch (ServerShutdownException e) {
             e.printStackTrace();
@@ -470,6 +466,8 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             return message.nodeInfo;
         } catch (ServerShutdownException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -481,46 +479,5 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             e.printStackTrace();
         }
         return null;
-    }
-}
-
-
-class NodeListReceiver implements MessageReceiver {
-    static private Logger LOGGER = LoggerFactory.getLogger(NodeListReceiver.class);
-    private SortedSet<NodeInfo> foundNodes = new TreeSet<>();
-    private int counter;
-
-    NodeListReceiver(int count) {
-        this.counter = count;
-    }
-
-    @Override
-    synchronized public void onReceive(Message message) {
-        try {
-            foundNodes.addAll(((NodeListMessage) message).nodes);
-            LOGGER.info(message.mSrcNodeInfo.toString() + " returned " + ((NodeListMessage) message).nodes);
-            notify();
-
-        } catch (Exception e) {
-            LOGGER.info("findClosestnodes() : error on receive");
-        }
-        counter--;
-    }
-
-    @Override
-    synchronized public void onTimeout() {
-        LOGGER.info("OnTimeout()");
-
-        counter--;
-        notify();
-    }
-
-    public boolean done() {
-        return counter <= 0;
-
-    }
-
-    public SortedSet<NodeInfo> foundNodes() {
-        return foundNodes;
     }
 }

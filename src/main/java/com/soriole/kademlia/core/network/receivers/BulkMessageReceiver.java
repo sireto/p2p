@@ -1,4 +1,4 @@
-package com.soriole.kademlia.network.receivers;
+package com.soriole.kademlia.core.network.receivers;
 
 import com.soriole.kademlia.core.messages.Message;
 import org.slf4j.Logger;
@@ -14,17 +14,19 @@ import java.util.ArrayList;
  * @author github.com/mesudip
  */
 public class BulkMessageReceiver implements MessageReceiver {
-    static Logger logger= LoggerFactory.getLogger(BulkMessageReceiver.class.getSimpleName());
+    static Logger logger = LoggerFactory.getLogger(BulkMessageReceiver.class.getSimpleName());
     ArrayList<Message> receivedMessages;
     int counter;
-    public BulkMessageReceiver(int count){
-        counter=count;
-        this.receivedMessages=new ArrayList<>(count);
+
+    public BulkMessageReceiver(int count) {
+        counter = count;
+        this.receivedMessages = new ArrayList<>(count);
     }
+
     @Override
     synchronized public void onReceive(Message message) {
         receivedMessages.add(message);
-        if(--counter<=0){
+        if (--counter <= 0) {
             notify();
         }
 
@@ -32,13 +34,13 @@ public class BulkMessageReceiver implements MessageReceiver {
 
     @Override
     synchronized public void onTimeout() {
-        if(--counter<=0){
+        if (--counter <= 0) {
             notify();
         }
     }
 
-    synchronized public ArrayList<Message> getMessages(){
-        while(counter>0){
+    synchronized public ArrayList<Message> getMessages() {
+        while (counter > 0) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -47,8 +49,8 @@ public class BulkMessageReceiver implements MessageReceiver {
             }
         }
 
-        ArrayList<Message> msgs=this.receivedMessages;
-        this.receivedMessages=null;
+        ArrayList<Message> msgs = this.receivedMessages;
+        this.receivedMessages = null;
         return msgs;
 
     }

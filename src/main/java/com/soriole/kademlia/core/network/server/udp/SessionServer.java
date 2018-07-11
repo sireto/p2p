@@ -1,22 +1,16 @@
-package com.soriole.kademlia.network.server;
-
+package com.soriole.kademlia.core.network.server.udp;
 
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.util.BlockingHashTable;
 import com.soriole.kademlia.core.util.BlockingHashTable2;
-import com.soriole.kademlia.core.util.BlockingHashTable3;
 import com.soriole.kademlia.core.util.BlockingHashTable4;
-import com.soriole.kademlia.network.ServerShutdownException;
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -27,19 +21,19 @@ import java.util.concurrent.TimeoutException;
  * </ol>
  *
  * @author github.com/mesudip
- *
  */
-public  abstract class SessionServer extends MessageServer {
-    private static Logger logger= LoggerFactory.getLogger(SessionServer.class);
+public abstract class SessionServer extends MessageServer {
+    private static Logger logger = LoggerFactory.getLogger(SessionServer.class);
     // for messages type operations
-    BlockingHashTable4<Long, Message> incomingMessageTable=new BlockingHashTable4<>(3000);
-    protected boolean listening=false;
+    BlockingHashTable4<Long, Message> incomingMessageTable = new BlockingHashTable4<>(3000);
+    protected boolean listening = false;
 
-    public SessionServer(DatagramSocket socket, ContactBucket bucket){
-        super(socket,bucket);
+    public SessionServer(DatagramSocket socket, ContactBucket bucket) {
+        super(socket, bucket);
     }
+
     public Message sendingInstance(Message message) {
-        message.mSrcNodeInfo=bucket.getLocalNode();
+        message.mSrcNodeInfo = bucket.getLocalNode();
         return message;
 
     }
@@ -58,7 +52,7 @@ public  abstract class SessionServer extends MessageServer {
             return incomingMessageTable.get(sessionId);
         } catch (IOException e) {
             incomingMessageTable.getIfExists(sessionId);
-            throw new ServerShutdownException(e.getClass().getName()+" --> "+e.getMessage());
+            throw new ServerShutdownException(e.getClass().getName() + " --> " + e.getMessage());
         }
     }
 
@@ -67,9 +61,9 @@ public  abstract class SessionServer extends MessageServer {
     }
 
 
-    protected void listen(){
-        listening=true;
-        logger.info("Started listening on -> "+socket.getLocalSocketAddress().toString());
+    protected void listen() {
+        listening = true;
+        logger.info("Started listening on -> " + socket.getLocalSocketAddress().toString());
         while (true) {
             try {
 
@@ -81,26 +75,27 @@ public  abstract class SessionServer extends MessageServer {
                     // if nobody is waiting, it got to be handled by default Listeners.
                     this.OnNewMessage(message);
                 }
-            }
-            catch (IOException e){
-                if(socket.isClosed()) {
-                    listening=false;
+            } catch (IOException e) {
+                if (socket.isClosed()) {
+                    listening = false;
                     logger.info("Server is shuttting down due to a request from another thread");
                     return;
                 }
 
             } catch (Exception e) {
-                logger.warn(e.getClass().getName()+" : "+e.getMessage());
-                StackTraceElement[] traces=e.getStackTrace();
-                for(int i=0;i<10 && i<traces.length;i++) {
+                logger.warn(e.getClass().getName() + " : " + e.getMessage());
+                StackTraceElement[] traces = e.getStackTrace();
+                for (int i = 0; i < 10 && i < traces.length; i++) {
                     logger.warn(traces[i].toString());
                 }
             }
         }
     }
-    synchronized protected void stopListening(){
-       this.socket.close();
-       listening=false;
+
+    synchronized protected void stopListening() {
+        this.socket.close();
+        listening = false;
     }
+
     abstract protected void OnNewMessage(Message message);
 }

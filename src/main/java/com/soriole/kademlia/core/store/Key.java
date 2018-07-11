@@ -1,10 +1,9 @@
 package com.soriole.kademlia.core.store;
 
-import java.io.Serializable;
+import com.soriole.kademlia.core.util.Base58;
+
 import java.math.BigInteger;
-import java.util.Base64;
 import java.util.BitSet;
-import java.util.Random;
 
 /**
  * Immutable 160 bit long Kademlia key.
@@ -16,9 +15,8 @@ public class Key implements ByteSerializable, Comparable {
     public static final int HEX = 16;
     private static final long serialVersionUID = 1L;
     private static final int BINARY = 2;
-    private static BigInteger MAX_KEY=new BigInteger("ffffffffffffffffffffffffffffffffffffffff",16);
+    private static BigInteger MAX_KEY = new BigInteger("ffffffffffffffffffffffffffffffffffffffff", 16);
     private BigInteger key;
-
 
     /**
      * Creates a key from integer in a little-endian bit fashion.
@@ -27,25 +25,31 @@ public class Key implements ByteSerializable, Comparable {
      * @throws IllegalArgumentException
      */
     private Key(BigInteger key) throws IllegalArgumentException {
-        if (key.compareTo(BigInteger.ZERO)<0) {
+        this.construct(key);
+    }
+
+    private void construct(BigInteger key) {
+        if (key.compareTo(BigInteger.ZERO) < 0) {
             throw new IllegalArgumentException("Key should be a nonnegative number.");
         }
-        if(key.compareTo(MAX_KEY)>0){
+        if (key.compareTo(MAX_KEY) > 0) {
             throw new IllegalArgumentException("Key size very large");
         }
         // create new copy of the biginteger.
-        this.key=new BigInteger(1,key.toByteArray());
-
-
+        this.key = new BigInteger(1, key.toByteArray());
     }
 
     public Key(byte[] keyByte) throws IllegalArgumentException {
-       this(new BigInteger(1,keyByte));
+        this(new BigInteger(1, keyByte));
     }
 
+    public Key(String base58Key) throws IllegalArgumentException {
 
-    public Key(String hexKey) {
-        this(new BigInteger(hexKey, HEX));
+        try {
+            this.construct(new BigInteger(1, Base58.fromBase58(base58Key)));
+        } catch (Base58.ValidationException e) {
+            throw new IllegalArgumentException("Invalid Base58 string");
+        }
     }
 
 
@@ -66,10 +70,10 @@ public class Key implements ByteSerializable, Comparable {
     public int getBucketPosition(Key otherKey) {
         BigInteger b1 = key.xor(otherKey.key);
         int k;
-        if(b1.equals(BigInteger.ZERO)){
+        if (b1.equals(BigInteger.ZERO)) {
             return -1;
         }
-        return b1.bitLength()-1;
+        return b1.bitLength() - 1;
     }
 
     @Override
@@ -98,7 +102,7 @@ public class Key implements ByteSerializable, Comparable {
 
     @Override
     public String toString() {
-        return Base64.getEncoder().encodeToString(key.toByteArray());
+        return Base58.toBase58(key.toByteArray());
     }
 
     @Override
@@ -108,11 +112,11 @@ public class Key implements ByteSerializable, Comparable {
 
     @Override
     public int compareTo(Object o) {
-        if(o==null){
+        if (o == null) {
             return 1;
         }
-        if(o instanceof Key)
+        if (o instanceof Key)
             return key.compareTo(((Key) o).key);
-        throw new IllegalArgumentException("Type Key cannot be compared with "+o.getClass().getName());
+        throw new IllegalArgumentException("Type Key cannot be compared with " + o.getClass().getName());
     }
 }

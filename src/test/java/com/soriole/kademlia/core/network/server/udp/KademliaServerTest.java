@@ -1,12 +1,12 @@
-package com.soriole.kademlia.core.network;
+package com.soriole.kademlia.core.network.server.udp;
 
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.NodeLookupMessage;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.network.KademliaMessageServer;
-import com.soriole.kademlia.network.ServerShutdownException;
+import com.soriole.kademlia.core.network.server.udp.KademliaServer;
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,36 +18,39 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Tests by transmitting a message in one server and receiving in another server. if the message is same
+ * //TODO: rewrite the test properly
  */
-public class KademliaMessageServerTest extends KademliaMessageServer{
+public class KademliaServerTest extends KademliaServer {
     int port;
     Message receivedMessage;
     NodeInfo localNode;
-    Logger logger= LoggerFactory.getLogger(KademliaMessageServerTest.class);
+    Logger logger = LoggerFactory.getLogger(KademliaServerTest.class);
+
     // listen in a random available port.
-    private static Key randomkey(){
-        byte[] keyByte=new byte[20];
+    private static Key randomkey() {
+        byte[] keyByte = new byte[20];
         new Random().nextBytes(keyByte);
         return new Key(keyByte);
     }
-    public KademliaMessageServerTest() throws SocketException {
+
+    public KademliaServerTest() throws SocketException {
         super(0,
-                new ContactBucket(new NodeInfo(randomkey()),160,3));
+                new ContactBucket(new NodeInfo(randomkey()), 160, 3));
         this.bucket.getLocalNode().setLanAddress(this.getSocketAddress());
-        port=this.getSocketAddress().getPort();
+        port = this.getSocketAddress().getPort();
 
     }
 
     // we override this so that incoming messages are not directed to the default listeners but to this class itself as a loopback server.
     @Override
-    protected void OnNewMessage(Message message){
+    protected void OnNewMessage(Message message) {
         try {
             // return the same message.
-            this.replyFor(message,message);
+            this.replyFor(message, message);
             logger.info("Message received on other side");
 
         } catch (IOException e) {
-            assert(false);
+            assert (false);
         }
     }
 
@@ -57,22 +60,22 @@ public class KademliaMessageServerTest extends KademliaMessageServer{
         this.start();
 
         // create another message server instance.
-        KademliaMessageServer server=new KademliaMessageServerTest() ;
+        KademliaServer server = new KademliaServerTest();
         server.start();
 
         // send a message to out server.
-        Key k1=randomkey();
+        Key k1 = randomkey();
 
         // query the server for the message and get a loopback reply.
         // Note that this involves a complex process of maintaining a session to
         // map the received message to the specific query.
-        Message mReply=server.startQuery(
-                new NodeInfo(null,this.getSocketAddress()),
+        Message mReply = startQuery(
+                new NodeInfo(null, server.getSocketAddress()),
                 new NodeLookupMessage(k1));
 
         // check that the replied message is same as the original message.
-        NodeLookupMessage reply=(NodeLookupMessage) mReply;
-        assert(reply.lookupKey.equals(k1));
+        NodeLookupMessage reply = (NodeLookupMessage) mReply;
+        assert (reply.lookupKey.equals(k1));
         server.shutDown(1);
 
         this.shutDown(1);

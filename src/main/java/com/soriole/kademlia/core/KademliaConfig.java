@@ -73,30 +73,34 @@ public class KademliaConfig {
     public int getKadeliaProtocolPort() {
         return kadeliaProtocolPort;
     }
-    public static KademliaConfig getDefaultConfig(){
+
+    public static KademliaConfig getDefaultConfig() {
         return new Builder().build();
     }
-    public static Builder newBuilder(){
+
+    public static Builder newBuilder() {
         return new Builder();
     }
 
     // since the kademlia config is a read only class,
     // We use a builder to create a KademliaConfig instance.
-    public static class Builder{
-        int k=2;
-        int alpha=3;
-        int timeout=3;
-        int nWorkers=10;
-        int keyLength=160;
-        int nodeAutoPingTime=30;
-        int keyValueRefreshTime=60*60;
-        int keyValueExpiryTime=24*60*60;
-        int kadeliaProtocolPort=0;
-        int httpPort=80;
-        Builder(){}
+    public static class Builder {
+        int k = 2;
+        int alpha = 3;
+        int timeout = 3;
+        int nWorkers = 30;
+        int keyLength = 160;
+        int nodeAutoPingTime = 30;
+        int keyValueRefreshTime = 60 * 60;
+        int keyValueExpiryTime = 24 * 60 * 60;
+        int kadeliaProtocolPort = 0;
+        int httpPort = 80;
 
-        public KademliaConfig build(){
-            return new KademliaConfig(){
+        Builder() {
+        }
+
+        public KademliaConfig build() {
+            return new KademliaConfig() {
                 {
                     super.k = Builder.this.k;
                     super.alpha = Builder.this.alpha;
@@ -111,6 +115,7 @@ public class KademliaConfig {
                 }
             };
         }
+
         public void setK(int k) {
             this.k = k;
         }

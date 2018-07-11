@@ -1,12 +1,15 @@
 package com.soriole.kademlia.core;
 
 import com.soriole.kademlia.core.store.*;
-import com.soriole.kademlia.network.KademliaMessageServer;
-import com.soriole.kademlia.network.ServerShutdownException;
+import com.soriole.kademlia.core.network.MessageDispacher;
+import com.soriole.kademlia.core.network.server.tcpsocket.KademliaServer;
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -21,11 +24,13 @@ public class KademliaDHTTest {
 
     Logger logger = LoggerFactory.getLogger(KademliaDHTTest.class.getSimpleName());
     // all the dht instances will share the same executor instance.
-    // the no of threads should me atleast (noOfDHTInstance + 5)
-    ExecutorService service = Executors.newFixedThreadPool(30);
+    // the no of threads required is quiet high when using tcp.KademliaServer as
+    // each connection required a separate thread to listen for the socket.
+    ExecutorService service = Executors.newFixedThreadPool(400);
 
 
     // 20 dht nodes should be sufficient to test it.
+    // changing N_DHT might require changing the size of Executors.
     final int N_DHTS = 20;
 
     ArrayList<KademliaDHT> dhts = new ArrayList<>(N_DHTS);
@@ -35,20 +40,20 @@ public class KademliaDHTTest {
     }
 
     // creates a DHT instance at random port.
-    private KademliaDHT createDHTinstance(Key key) throws SocketException {
+    private KademliaDHT createDHTinstance(Key key) throws IOException {
         NodeInfo localKey = new NodeInfo(key);
         ContactBucket bucket = new ContactBucket(localKey, 160, 3);
         TimestampedStore<byte[]> timestampedStore = new InMemoryByteStore(KademliaDHT.defaultExpirationTime);
-        KademliaMessageServer server = new KademliaMessageServer(0, bucket, service, timestampedStore);
-        bucket.getLocalNode().setLanAddress(server.getSocketAddress());
-        return new KademliaDHT(bucket, server, timestampedStore);
+        MessageDispacher server = new KademliaServer(0, bucket, service, timestampedStore);
+        bucket.getLocalNode().setLanAddress(server.getUsedSocketAddress());
+        return new KademliaDHT(bucket, server, timestampedStore,KademliaConfig.newBuilder().build());
     }
 
     public KademliaDHTTest() throws Exception {
         for (int i = 0; i < N_DHTS; i++) {
 
             // kademlia id of i'th dht = valueof(i)
-            dhts.add(createDHTinstance(new Key(hex(i + 1))));
+            dhts.add(createDHTinstance(new Key(new BigInteger(hex(i + 1), 16).toByteArray())));
             dhts.get(i).server.start();
         }
         Thread.sleep(1000);
@@ -67,7 +72,7 @@ public class KademliaDHTTest {
         // 1st dht is the bootstrap all others will join it.
         NodeInfo bootstrapNode = dhts.get(0).bucket.getLocalNode();
         for (int i = 1; i < dhts.size(); i++) {
-            logger.debug("\nConnecting Node " + hex(i + 1) + " with bootstrap node --");
+            logger.debug("\nConnecting Node " + dhts.get(i).getLocalNode().getKey() + " with bootstrap node --");
             // join involves many async queries.
             assert dhts.get(i).join(bootstrapNode);
 
@@ -98,8 +103,8 @@ public class KademliaDHTTest {
                     KademliaDHT dj = dhts.get(j);
                     NodeInfo nj = dj.bucket.getLocalNode();
 
-                    logger.debug("\nNode  " + hex(i + 1) + " is finding nodes closest to " + hex(j + 1) +
-                            "\nBucket of " + hex(i + 1) + " : " + di.bucket.getAllNodes().toString()
+                    logger.debug("\nNode  " + ni + " is finding nodes closest to " + nj +
+                            "\nBucket of " + ni + " : " + di.bucket.getAllNodes().toString()
 
                     );
 
@@ -158,11 +163,11 @@ public class KademliaDHTTest {
                     KademliaDHT di = dhts.get(i);
                     KademliaDHT dj = dhts.get(j);
 
-                    logger.debug("\nNode  " + hex(i + 1) + " is finding  Node" + hex(j + 1) +
-                            "\nBucket of " + hex(i + 1) + " : " + di.bucket.getAllNodes().toString()
+                    logger.debug("\nNode-" + di.getLocalNode().getKey() + " is finding  Node-" + dj.getLocalNode().getKey() +
+                            "\nBucket of " + di.getLocalNode().getKey() + " : " + di.bucket.getAllNodes().toString()
                     );
                     //use findNode algorithm. since all nodes are present, it shouldn't return null.
-                    assert dj.findNode(di.bucket.getLocalNode().getKey()) != null;
+                    assert di.findNode(dj.bucket.getLocalNode().getKey()) != null;
 
                     logger.debug("\nSuccessful !!!");
                 }
@@ -195,7 +200,7 @@ public class KademliaDHTTest {
             byte[] bArray = new byte[8];
             random.nextBytes(bArray);
 
-            logger.debug(" Node " + (i + 1) + " storing  :" + rKey);
+            logger.debug(" Node " + dhts.get(i).getLocalNode().getKey() + " storing  :" + rKey);
 
             // put it them in the dht network and the verification Table.
             dhts.get(i).put(rKey, bArray);
@@ -249,7 +254,7 @@ public class KademliaDHTTest {
             // put the key and hex representation key, so that it's easy while debugging.
             dhts.get(i).put(k, k.toBytes());
 
-            logger.debug(" Node " + (i + 1) + " stored  :" + k);
+            logger.debug(" Node " + dhts.get(i).getLocalNode().getKey() + " stored  :" + k);
 
         }
 

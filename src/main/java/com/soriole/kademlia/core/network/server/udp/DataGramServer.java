@@ -1,4 +1,4 @@
-package com.soriole.kademlia.network.server;
+package com.soriole.kademlia.core.network.server.udp;
 
 
 import java.io.IOException;
@@ -12,9 +12,10 @@ public class DataGramServer {
     boolean active;
     protected DatagramSocket socket;
 
-    protected DataGramServer(DatagramSocket socket){
-        this.socket=socket;
+    protected DataGramServer(DatagramSocket socket) {
+        this.socket = socket;
     }
+
     protected synchronized DatagramPacket receivePacket() throws IOException {
         byte[] buffer = new byte[DATAGRAM_BUFFER_SIZE];
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
@@ -39,7 +40,8 @@ public class DataGramServer {
         packet.setSocketAddress(address);
         return packet;
     }
-    public final InetSocketAddress getSocketAddress(){
+
+    public final InetSocketAddress getSocketAddress() {
         return (InetSocketAddress) this.socket.getLocalSocketAddress();
     }
 }
