@@ -94,11 +94,14 @@ public class KademliaApiController {
 
 
     @GetMapping(value = "/store/{key}:{value}")
-    public int store(@PathVariable("key") String paramKey, @PathVariable("value") String value) {
+    public int store(@PathVariable("key") String paramKey, @PathVariable("value") String value,@RequestParam(value = "clone",required = false) Integer redundancy) {
         try {
-            this.kademliaService.getDHT().put(new Key(paramKey), value.getBytes());
-            return kademliaService.getDHT().put(new Key(paramKey), value.getBytes()) + 1;
-
+            if(redundancy!=null) {
+                return kademliaService.getDHT().put(new Key(paramKey), value.getBytes());
+            }
+            else{
+                return kademliaService.getDHT().put(new Key(paramKey),value.getBytes(),redundancy);
+            }
         } catch (ServerShutdownException e) {
             e.printStackTrace();
         }
@@ -176,7 +179,7 @@ public class KademliaApiController {
         return "Udp Puncture was not running";
     }
 
-    @GetMapping("/myInfo/{peerid}")
+    @GetMapping("/myinfo/{nodeid}")
     public ResponseEntity getMyip(@PathVariable("nodeid") String nodeid) {
         try {
             NodeInfo info = kademliaService.getDHT().findMyInfo(new Key(nodeid));

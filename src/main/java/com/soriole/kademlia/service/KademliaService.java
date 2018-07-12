@@ -54,7 +54,7 @@ public class KademliaService {
     public void init() throws SocketException {
         // if the key is zero create a random key.
         Key localKey = new Key(localKeyValue);
-        if (localKeyValue.equals(new Key("0"))) {
+        if (localKey.equals(new Key("0"))) {
             byte[] info = new byte[20];
             new Random().nextBytes(info);
             localKey = new Key(info);

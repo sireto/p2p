@@ -151,7 +151,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             }
         }
         putLocal(key, value);
-        return successes;
+        return successes+1;
 
     }
 
@@ -459,11 +459,13 @@ public class KademliaDHT implements KadProtocol<byte[]> {
 
     public NodeInfo findMyInfo(NodeInfo nodeInfo) throws TimeoutException {
         try {
-            EchoReplyMessage message = (EchoReplyMessage) server.startQuery(nodeInfo, new EchoMessage());
-            if (message == null) {
-                return null;
+            Message message =  server.startQuery(nodeInfo, new EchoMessage());
+            if(message instanceof EchoReplyMessage){
+                return ((EchoReplyMessage) message).nodeInfo;
             }
-            return message.nodeInfo;
+            LOGGER.warn("findMyNodeInfo() : Invalid type "+message.getClass()+" replied for EchoMessage");
+            return null;
+
         } catch (ServerShutdownException e) {
             e.printStackTrace();
         } catch (IOException e) {
