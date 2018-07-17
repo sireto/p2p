@@ -1,5 +1,6 @@
 package com.soriole.kademlia.core.network.server.udp;
 
+import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.NodeInfo;
@@ -22,13 +23,13 @@ import java.util.concurrent.TimeoutException;
  *
  * @author github.com/mesudip
  */
-public abstract class SessionServer extends MessageServer {
+abstract class SessionServer extends MessageServer {
     private static Logger logger = LoggerFactory.getLogger(SessionServer.class);
     // for messages type operations
     BlockingHashTable4<Long, Message> incomingMessageTable = new BlockingHashTable4<>(3000);
     protected boolean listening = false;
-
-    public SessionServer(DatagramSocket socket, ContactBucket bucket) {
+    protected KademliaConfig config;
+    public SessionServer(DatagramSocket socket, ContactBucket bucket, KademliaConfig config) {
         super(socket, bucket);
     }
 
@@ -39,7 +40,7 @@ public abstract class SessionServer extends MessageServer {
     }
 
 
-    protected Message query(Message message, NodeInfo receiver, long sessionId) throws TimeoutException, ServerShutdownException {
+    protected Message query(Message message, NodeInfo receiver, long sessionId,long timeoutMs) throws TimeoutException, ServerShutdownException {
         if (receiver.equals(bucket.getLocalNode())) {
             logger.warn("Coding Error ! The server is trying to send message to itself!");
             return null;
@@ -49,15 +50,15 @@ public abstract class SessionServer extends MessageServer {
         try {
             this.incomingMessageTable.reserverForGet(sessionId);
             super.sendMessage(message, receiver, sessionId);
-            return incomingMessageTable.get(sessionId);
+            return incomingMessageTable.get(sessionId,timeoutMs);
         } catch (IOException e) {
             incomingMessageTable.getIfExists(sessionId);
             throw new ServerShutdownException(e.getClass().getName() + " --> " + e.getMessage());
         }
     }
 
-    protected Message query(Message message) throws TimeoutException, ServerShutdownException {
-        return query(message, message.mDestNodeInfo, message.sessionId);
+    protected Message query(Message message,long timeoutMs) throws TimeoutException, ServerShutdownException {
+        return query(message, message.mDestNodeInfo, message.sessionId,timeoutMs);
     }
 
 
@@ -83,7 +84,7 @@ public abstract class SessionServer extends MessageServer {
                 }
 
             } catch (Exception e) {
-                logger.warn(e.getClass().getName() + " : " + e.getMessage());
+                logger.warn(String.format("%s : %s", e.getClass().getName(), e.getMessage()));
                 StackTraceElement[] traces = e.getStackTrace();
                 for (int i = 0; i < 10 && i < traces.length; i++) {
                     logger.warn(traces[i].toString());

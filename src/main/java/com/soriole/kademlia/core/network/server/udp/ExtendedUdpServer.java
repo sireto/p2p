@@ -1,5 +1,6 @@
 package com.soriole.kademlia.core.network.server.udp;
 
+import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.NonKademliaMessage;
 import com.soriole.kademlia.core.store.ContactBucket;
@@ -20,13 +21,13 @@ import java.net.SocketException;
  *
  * @author github.com/mesudip
  */
-public class ExtendedKademliaServer extends KademliaServer implements ExtendedMessageDispacher {
-    static Logger logger = LoggerFactory.getLogger(ExtendedKademliaServer.class);
+public class ExtendedUdpServer extends UdpServer implements ExtendedMessageDispacher {
+    static Logger logger = LoggerFactory.getLogger(ExtendedUdpServer.class);
 
     public ByteReceiver receiver = getDefaultReceiver();
 
-    public ExtendedKademliaServer(int listeningPort, ContactBucket bucket, TimestampedStore store) throws SocketException {
-        super(listeningPort, bucket, store);
+    public ExtendedUdpServer(KademliaConfig config, ContactBucket bucket, TimestampedStore store) throws SocketException {
+        super(config, bucket, store);
     }
 
     @Override

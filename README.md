@@ -7,15 +7,15 @@ Blockchain p2p messaging
 
 - Default configuration options are present in `src/main/resources/application.properties`
 
-- Build command: `./gradlew build -x test`
+- Build command: `./gradlew bootJar`
 
-- Start bootstrap node : `java -jar -Dserver.port=8080 -Dbootstrap=true -Dlocal.key=node1 -Dlocal.address.port=1200 ./build/libs/p2p-kademlia-2.0.0.jar`
+- Start bootstrap node : `java -jar -Dserver.port=8080 -Dbootstrap=true -Dlocal.key=node1 -Dlocal.address.port=1200 ./build/libs/kademlia-standalone.jar`
 
 - Start another node and connect to bootstrap node:
- `java -jar -Dserver.port=8081  -Dlocal.key=node2 -Dbootstrap.address.port=1200 ./build/libs/p2p-kademlia-2.0.0.jar`
+ `java -jar -Dserver.port=8081  -Dlocal.key=node2 -Dbootstrap.address.port=1200 ./build/libs/kademlia-standalone.jar`
 
 - Start yet another node and connect to bootstrap node:
- `java -jar -Dserver.port=8082 -Dlocal.key=node3 -Dbootstrap.address.port=1200 ./build/libs/p2p-kademlia-2.0.0.jar`
+ `java -jar -Dserver.port=8082 -Dlocal.key=node3 -Dbootstrap.address.port=1200 ./build/libs/kademlia-standalone.jar`
 
 **Available api endpoints**
 
@@ -32,7 +32,17 @@ Blockchain p2p messaging
 
 
 # Using as a Library
-
+```groovy
+    repositories{
+        maven {
+                url 'http://playground2.sireto.com:8081/artifactory/release'
+        }
+    }
+    dependencies{
+        compile(group: 'com.soriole', name: 'kademlia', version: '2.0.0')
+    }
+    
+```
 **"KademliaDHT" class**
 
 kademliaDHT provides access to the dht features. The components required to make a DHT are:
@@ -45,27 +55,31 @@ kademliaDHT provides access to the dht features. The components required to make
 **Setting up Kademlia DHT**
 
 ```java
-// create a configuration builder class and set the parameters as per requirement
-KademliaConfig.Builder configBuilder=KademliaConfig.newBuilder();
-configBuilder.setKadeliaProtocolPort(9999);
-configBuilder.setK(3);
-KademliaConfig config=configBuilder.build();
-
-// create identifier key for your DHT node keys are binary values and serilized using base58 encoding
-Key key=new Key("ab1245")
-
-// create a contact bucket Instance
-ContactBucket bucket=new ContactBucket(key,config);
-
-// storage for the DHT use the inmemory Store for testing
-InMemoryByteStore dhtStore = new InMemoryByteStore(config);
-
-//create a message dispacher instance. tcp and udp dispachers are available.
-MessageDispacher dispacher=new com.soriole.kademlia.core.network.server.udp.KademliaServer(bucket,dhtStore,config)
-
-// create kademliaExtendedDHT Instance using the autowired storageService
-KademliaDHT dht=new KademliaDHT(bucket,disacher,dhtStore,config)
-
-// additionally if you want to connect this kademlia Dht with another Dht node
-dht.join(new InetSocketAddress("localhost",__kademlia_port_of_another_instance));
+public class Test{
+    public static void main(String args[]){
+        // create a configuration builder class and set the parameters as per requirement
+        KademliaConfig.Builder configBuilder=KademliaConfig.newBuilder();
+        configBuilder.setKadeliaProtocolPort(9999);
+        configBuilder.setK(3);
+        KademliaConfig config=configBuilder.build();
+        
+        // create identifier key for your DHT node keys are binary values and serilized using base58 encoding
+        Key key=new Key("ab1245");
+        
+        // create a contact bucket Instance
+        ContactBucket bucket=new ContactBucket(key,config);
+        
+        // storage for the DHT use the inmemory Store for testing
+        InMemoryByteStore dhtStore = new InMemoryByteStore(config);
+        
+        //create a message dispacher instance. tcp and udp dispachers are available.
+        MessageDispacher dispacher=new UdpServer(bucket,dhtStore,config);
+        
+        // create kademliaExtendedDHT Instance using the autowired storageService
+        KademliaDHT dht=new KademliaDHT(bucket,disacher,dhtStore,config);
+        
+        // additionally if you want to connect this kademlia Dht with another Dht node
+        dht.join(new InetSocketAddress("localhost",__kademlia_port_of_another_instance));
+    }
+}
 ```

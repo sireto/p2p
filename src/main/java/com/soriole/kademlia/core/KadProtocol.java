@@ -73,6 +73,6 @@ This is a primitive operation, not an iterative one.
     boolean join(NodeInfo node);
 
     // used to join to a node with known ip:port but not the KadID
-    void join(InetSocketAddress address);
+    boolean join(InetSocketAddress address);
 
 }

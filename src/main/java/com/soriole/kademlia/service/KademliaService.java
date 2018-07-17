@@ -1,11 +1,7 @@
 package com.soriole.kademlia.service;
 
 import com.soriole.kademlia.core.*;
-import com.soriole.kademlia.core.network.MessageDispacher;
-import com.soriole.kademlia.core.network.server.udp.KademliaServer;
 import com.soriole.kademlia.core.store.*;
-import com.soriole.kademlia.core.network.ServerShutdownException;
-import com.soriole.kademlia.core.network.receivers.ByteReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +10,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Random;
-import java.util.concurrent.TimeoutException;
 
 @Service("kademliaService")
 public class KademliaService {

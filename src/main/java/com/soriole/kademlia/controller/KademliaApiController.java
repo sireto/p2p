@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -142,6 +143,13 @@ public class KademliaApiController {
         }
         return "Error connecting to node.";
     }
+    @GetMapping(value="/join/{address}:{port}")
+    public NodeInfoCollectionBean join(@PathVariable("address") String address,@PathVariable("port") int port){
+        kademliaService.getDHT().join(new InetSocketAddress(address,port));
+        return NodeInfoCollectionBean.fromNodeInfoCollection(kademliaService.getDHT().getRoutingTable());
+
+
+    }
 
     @GetMapping("/refreshTable")
     public String refreshPeers() {
@@ -190,5 +198,16 @@ public class KademliaApiController {
             return ResponseEntity.ok("Peer didn't reply");
         }
         return ResponseEntity.ok("Unknown error");
+    }
+    @GetMapping("/systeminfo")
+    public ResponseEntity getSystemInfo(){
+
+        com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+
+        long physicalMemorySize = os.getTotalPhysicalMemorySize();
+        long freePhysicalMemory = os.getFreePhysicalMemorySize();
+        long freeSwapSize = os.getFreeSwapSpaceSize();
+        long commitedVirtualMemorySize = os.getCommittedVirtualMemorySize();
+        return ResponseEntity.ok("Not yet implemented");
     }
 }

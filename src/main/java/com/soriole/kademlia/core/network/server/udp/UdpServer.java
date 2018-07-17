@@ -25,48 +25,26 @@ import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.*;
 
-public class KademliaServer extends SessionServer implements MessageDispacher {
-    private static Logger LOGGER = LoggerFactory.getLogger(KademliaServer.class.getSimpleName());
+public class UdpServer extends SessionServer implements MessageDispacher {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UdpServer.class.getSimpleName());
     NodeInteractionListener nodeInteractionListener;
     int port;
-    private static final int nThreadCount = 10;
     ExecutorService workerPool = null;
     private TimestampedStore keyStore;
 
-    public void setAlpha(int a) {
-    }
-
-    public KademliaServer(int listeningPort, ContactBucket bucket, ExecutorService service, TimestampedStore store) throws SocketException {
-        super(new DatagramSocket(listeningPort), bucket);
+    public UdpServer(KademliaConfig config, ContactBucket bucket, ExecutorService service, TimestampedStore store) throws SocketException {
+        super(new DatagramSocket(config.getKadeliaProtocolPort()), bucket, config);
         nodeInteractionListener = getDefaultInteractionListener(bucket);
         this.workerPool = service;
-        this.port = listeningPort;
+        this.port = socket.getLocalPort();
         this.keyStore = store;
-
+        this.config = config;
     }
 
-    public KademliaServer(ContactBucket bucket, ExecutorService service, TimestampedStore store, KademliaConfig config) throws SocketException {
-        this(config.getKadeliaProtocolPort(), bucket, service, store);
+    public UdpServer(KademliaConfig config, ContactBucket bucket, TimestampedStore store) throws SocketException {
+        this(config, bucket, Executors.newFixedThreadPool(config.getnWorkers()), store);
 
     }
-
-    public KademliaServer(ContactBucket bucket, TimestampedStore store, KademliaConfig config) throws SocketException {
-        this(config.getKadeliaProtocolPort(), bucket, Executors.newFixedThreadPool(config.getnWorkers()), store);
-
-    }
-
-
-    // this method was used when the kademlia DHT didn't had implementation of storage.
-    // this will be removed in future refactor.
-    @Deprecated
-    public KademliaServer(int listeningPort, ContactBucket bucket) throws SocketException {
-        this(listeningPort, bucket, null);
-    }
-
-    public KademliaServer(int listeningPort, ContactBucket bucket, TimestampedStore store) throws SocketException {
-        this(listeningPort, bucket, null, store);
-    }
-
 
     @Override
     public void sendMessage(NodeInfo receiver, Message message) throws IOException {
@@ -80,11 +58,21 @@ public class KademliaServer extends SessionServer implements MessageDispacher {
         super.sendMessage(reply);
     }
 
-    public Message queryFor(Message incoming, Message reply) throws TimeoutException, ServerShutdownException {
+    public Message queryFor(Message incoming, Message reply) throws TimeoutException, ServerShutdownException, IOException {
+        return this.queryFor(incoming, reply, config.getConnectionTimeout());
+
+    }
+
+    @Override
+    public Message queryFor(Message incoming, Message reply, long timeoutMs) throws TimeoutException, IOException, ServerShutdownException {
         reply.sessionId = incoming.sessionId;
         reply.mDestNodeInfo = incoming.mSrcNodeInfo;
-        return super.query(reply);
+        return super.query(reply, timeoutMs);
+    }
 
+    @Override
+    public Collection<Message> startAsyncQueryAll(Collection<NodeInfo> nodes, Message queryMessage) {
+        return this.startAsyncQueryAll(nodes, queryMessage, config.getConnectionTimeout());
     }
 
     /**
@@ -97,19 +85,19 @@ public class KademliaServer extends SessionServer implements MessageDispacher {
      * @param queryMessage Message to send
      * @return reply from the nodes. //If a node fails to reply, message won't be available and the particular node cannot be determined
      */
-    public Collection<Message> startAsyncQueryAll(Collection<NodeInfo> nodes, Message queryMessage) {
+    public Collection<Message> startAsyncQueryAll(Collection<NodeInfo> nodes, Message queryMessage, long timeoutMs) {
         final BulkMessageReceiver receiver = new BulkMessageReceiver(nodes.size());
         final Random random = new Random();
         // copy the list so that there's no inconsistency if calling thread modifies the passed collection.
         for (NodeInfo node : new ArrayList<>(nodes)) {
             workerPool.submit(() -> {
                 try {
-                    receiver.onReceive(super.query(queryMessage, node, random.nextLong()));
+                    receiver.onReceive(super.query(queryMessage, node, random.nextLong(), timeoutMs));
                     return;
                 } catch (TimeoutException e) {
                     // this is normal to happen
                 } catch (ServerShutdownException e) {
-                    e.printStackTrace();
+                    LOGGER.warn("Unexpected exception", e);
                 }
                 LOGGER.info("Timeout on startAsyncQuery to : " + node.getKey());
                 receiver.onTimeout();
@@ -119,37 +107,52 @@ public class KademliaServer extends SessionServer implements MessageDispacher {
     }
 
     public void asynQueryFor(Message incoming, Message reply, MessageReceiver msgReceiver) throws ServerShutdownException {
-        reply.sessionId = incoming.sessionId;
-        reply.mDestNodeInfo = incoming.mSrcNodeInfo;
-        submitQuerytoPool(reply, msgReceiver);
+        this.asynQueryFor(incoming, reply, config.getConnectionTimeout(), msgReceiver);
     }
 
-    public Message startQuery(NodeInfo receiver, Message message) throws TimeoutException, ServerShutdownException {
-        message.mDestNodeInfo = receiver;
-        message = super.query(message);
-        return message;
+    @Override
+    public void asynQueryFor(Message incoming, Message reply, long timeoutMs, MessageReceiver msgReceiver) throws ServerShutdownException {
+        reply.sessionId = incoming.sessionId;
+        reply.mDestNodeInfo = incoming.mSrcNodeInfo;
+        submitQuerytoPool(reply, msgReceiver, timeoutMs);
+    }
 
+    public Message startQuery(NodeInfo receiver, Message message) throws TimeoutException, ServerShutdownException, IOException {
+        return this.startQuery(receiver, message, config.getConnectionTimeout());
+
+    }
+
+    @Override
+    public Message startQuery(NodeInfo receiver, Message message, long timeoutMs) throws TimeoutException, ServerShutdownException, IOException {
+        message.mDestNodeInfo = receiver;
+        message = super.query(message, timeoutMs);
+        return message;
     }
 
 
     public void startQueryAsync(NodeInfo receiver, Message message, final MessageReceiver msgReceiver) throws ServerShutdownException {
-
-        message.mDestNodeInfo = receiver;
-        message.sessionId = new Random().nextLong();
-        submitQuerytoPool(message, msgReceiver);
+        this.startQueryAsync(receiver, message, config.getConnectionTimeout(), msgReceiver);
     }
 
-    private void submitQuerytoPool(final Message message, final MessageReceiver msgReceiver) throws ServerShutdownException {
+    @Override
+    public void startQueryAsync(NodeInfo receiver, Message message, long timeoutMs, MessageReceiver msgReceiver) throws ServerShutdownException {
+        message.mDestNodeInfo = receiver;
+        message.sessionId = new Random().nextLong();
+        submitQuerytoPool(message, msgReceiver, timeoutMs);
+    }
+
+    private void submitQuerytoPool(final Message message, final MessageReceiver msgReceiver, long timeoutMs) throws ServerShutdownException {
         if (workerPool == null || socket.isClosed()) {
             throw new ServerShutdownException();
         }
         workerPool.submit(() -> {
             try {
-                msgReceiver.onReceive(super.query(message));
+                msgReceiver.onReceive(super.query(message, timeoutMs));
                 return;
             } catch (TimeoutException e) {
+                // ignored exception.
             } catch (ServerShutdownException e) {
-                e.printStackTrace();
+                LOGGER.warn("Unexpected Exception", e);
             }
             msgReceiver.onTimeout();
         });
@@ -171,9 +174,7 @@ public class KademliaServer extends SessionServer implements MessageDispacher {
             });
         } catch (ListenerFactory.NoListenerException e) {
             LOGGER.warn(message.getClass().getSimpleName() + " : sent by `" + message.mSrcNodeInfo.getKey() + "` received and dropped ");
-            return;
         }
-        ;
     }
 
     public boolean shutDown(int timeSeconds) throws InterruptedException {
@@ -181,7 +182,9 @@ public class KademliaServer extends SessionServer implements MessageDispacher {
             return false;
         }
         super.stopListening();
-        this.workerPool.awaitTermination(timeSeconds, TimeUnit.SECONDS);
+        if (timeSeconds > 0) {
+            this.workerPool.awaitTermination(timeSeconds, TimeUnit.SECONDS);
+        }
         this.workerPool.shutdown();
         this.workerPool = null;
         return true;
@@ -204,19 +207,20 @@ public class KademliaServer extends SessionServer implements MessageDispacher {
      * @return True if server begins starts , False if server was already running
      * @throws SocketException
      */
-    public boolean start() throws SocketException {
+    public synchronized boolean start() throws SocketException {
         if (this.workerPool == null) {
-            this.workerPool = Executors.newFixedThreadPool(nThreadCount);
+            this.workerPool = Executors.newFixedThreadPool(config.getnWorkers());
         }
 
         if (this.socket.isClosed()) {
             this.socket = new DatagramSocket(port);
-            workerPool.submit(() -> listen());
+
+            workerPool.submit(this::listen);
             return true;
         }
         // socket is created but not started to read
         else if (!this.listening) {
-            workerPool.submit(() -> listen());
+            workerPool.submit(this::listen);
             return true;
         }
 
@@ -269,7 +273,7 @@ public class KademliaServer extends SessionServer implements MessageDispacher {
 
             @Override
             public void onNewNodeFound(NodeInfo info) {
-                //LOGGER.warn("Bucket overflow occured and the contact is ignored : " + info.getKey().toString());
+                // ignored
 
             }
 

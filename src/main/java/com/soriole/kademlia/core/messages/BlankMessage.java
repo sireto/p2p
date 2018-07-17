@@ -1,7 +1,5 @@
 package com.soriole.kademlia.core.messages;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
 public class BlankMessage extends Message {
     @Override
     public byte[] writeToBytes() {
@@ -9,7 +7,7 @@ public class BlankMessage extends Message {
     }
 
     @Override
-    public void readFromBytes(byte[] bytes){
-
+    public void readFromBytes(byte[] bytes) {
+        // blank message need not be read.
     }
 }

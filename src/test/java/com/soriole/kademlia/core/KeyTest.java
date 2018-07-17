@@ -57,10 +57,10 @@ public final class KeyTest {
 
         assertEquals(1, 0, one.getBucketPosition(two));
 
-        assertEquals(0, new Key("fffe").getBucketPosition(ffff));
+        assertEquals(22, new Key("fffe").getBucketPosition(ffff));
 
-        assertEquals(159, new Key("ffffffffffffffffffffffffffffffffffffffff").getBucketPosition(zero));
+        assertEquals(159, new Key("3ffffffffffffffffffffffffffZ").getBucketPosition(zero));
 
-        assertEquals(160 / 2 - 1, new Key("0fffffffffffffffffff").getBucketPosition(new Key("8abcde12343ffff41adf")));
+        assertEquals(114, new Key("0ffffffffffffffffff").getBucketPosition(new Key("8abcde12343ffff41adf")));
     }
 }

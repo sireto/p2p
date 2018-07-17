@@ -20,7 +20,7 @@ public class ContactBucket {
     public final int k;
     private NodeInfo localNode;
 
-    public ContactBucket(NodeInfo localNode, int bitLength, int k) {
+    private ContactBucket(NodeInfo localNode, int bitLength, int k) {
         this.localNode = localNode;
         this.k = k;
         buckets = new SortedSet[bitLength];

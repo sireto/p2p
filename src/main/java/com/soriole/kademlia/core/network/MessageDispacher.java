@@ -20,13 +20,22 @@ public interface MessageDispacher {
 
     Message queryFor(Message incoming, Message reply) throws TimeoutException, IOException, ServerShutdownException;
 
+    Message queryFor(Message incoming, Message reply,long timeoutMs) throws TimeoutException, IOException, ServerShutdownException;
+
     Collection<Message> startAsyncQueryAll(Collection<NodeInfo> nodes, Message queryMessage);
+    Collection<Message> startAsyncQueryAll(Collection<NodeInfo> nodes, Message queryMessage,long timeoutMs);
 
     void asynQueryFor(Message incoming, Message reply, MessageReceiver msgReceiver) throws ServerShutdownException;
 
+    void asynQueryFor(Message incoming, Message reply,long timeoutMs,final MessageReceiver msgReceiver) throws ServerShutdownException;
+
     Message startQuery(NodeInfo receiver, Message message) throws TimeoutException, ServerShutdownException, IOException;
 
+    Message startQuery(NodeInfo receiver, Message message,long timeoutMs) throws TimeoutException, ServerShutdownException, IOException;
+
     void startQueryAsync(NodeInfo receiver, Message message, final MessageReceiver msgReceiver) throws ServerShutdownException;
+
+    void startQueryAsync(NodeInfo receiver, Message message,long timeoutMs, final MessageReceiver msgReceiver) throws ServerShutdownException;
 
     boolean shutDown(int timeSeconds) throws InterruptedException;
 

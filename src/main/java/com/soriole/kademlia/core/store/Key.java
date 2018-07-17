@@ -4,6 +4,7 @@ import com.soriole.kademlia.core.util.Base58;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+import java.util.Random;
 
 /**
  * Immutable 160 bit long Kademlia key.
@@ -12,9 +13,6 @@ import java.util.BitSet;
  */
 public class Key implements ByteSerializable, Comparable {
     public static final int KEY_LENGTH = 160;
-    public static final int HEX = 16;
-    private static final long serialVersionUID = 1L;
-    private static final int BINARY = 2;
     private static BigInteger MAX_KEY = new BigInteger("ffffffffffffffffffffffffffffffffffffffff", 16);
     private BigInteger key;
 
@@ -24,7 +22,7 @@ public class Key implements ByteSerializable, Comparable {
      * @param key nonnegative number
      * @throws IllegalArgumentException
      */
-    private Key(BigInteger key) throws IllegalArgumentException {
+    private Key(BigInteger key){
         this.construct(key);
     }
 
@@ -118,5 +116,12 @@ public class Key implements ByteSerializable, Comparable {
         if (o instanceof Key)
             return key.compareTo(((Key) o).key);
         throw new IllegalArgumentException("Type Key cannot be compared with " + o.getClass().getName());
+    }
+
+    public static Key gemerateNew() {
+        byte[] randomBytes = new byte[KEY_LENGTH / 8];
+        new Random().nextBytes(randomBytes);
+        return new Key(randomBytes);
+
     }
 }

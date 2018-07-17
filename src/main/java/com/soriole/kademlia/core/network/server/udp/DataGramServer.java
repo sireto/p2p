@@ -7,7 +7,7 @@ import java.net.*;
 /**
  * DataGram Server is responsible for sending and receiving Datagram raw packets from a DatagramSocket.
  */
-public class DataGramServer {
+class DataGramServer {
     private static final int DATAGRAM_BUFFER_SIZE = 64 * 1024;      // 64KB
     boolean active;
     protected DatagramSocket socket;
@@ -41,7 +41,4 @@ public class DataGramServer {
         return packet;
     }
 
-    public final InetSocketAddress getSocketAddress() {
-        return (InetSocketAddress) this.socket.getLocalSocketAddress();
-    }
 }

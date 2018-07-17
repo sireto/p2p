@@ -1,8 +1,8 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.network.server.tcpsocket.TcpServer;
 import com.soriole.kademlia.core.store.*;
 import com.soriole.kademlia.core.network.MessageDispacher;
-import com.soriole.kademlia.core.network.server.tcpsocket.KademliaServer;
 import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,42 +17,44 @@ import java.util.concurrent.Executors;
 import static org.junit.Assert.*;
 
 /**
- * Test diffreent kademlia rpcs by creating  a kademlia network containg N_DHTS no. of nodes.
+ * Test diffreent kademlia rpcs by creating  a kademlia network containg nDHTS no. of nodes.
  */
 public class KademliaDHTTest {
 
     Logger logger = LoggerFactory.getLogger(KademliaDHTTest.class.getSimpleName());
     // all the dht instances will share the same executor instance.
-    // the no of threads required is quiet high when using tcp.KademliaServer as
+    // the no of threads required is quiet high when using tcp.TcpServer as
     // each connection required a separate thread to listen for the socket.
     ExecutorService service = Executors.newFixedThreadPool(400);
 
 
     // 20 dht nodes should be sufficient to test it.
     // changing N_DHT might require changing the size of Executors.
-    final int N_DHTS = 20;
+    private final int nDHTS = 20;
 
-    ArrayList<KademliaDHT> dhts = new ArrayList<>(N_DHTS);
+    ArrayList<KademliaDHT> dhts = new ArrayList<>(nDHTS);
 
     private String hex(int i) {
         return Integer.toHexString(i);
     }
 
     // creates a DHT instance at random port.
-    private KademliaDHT createDHTinstance(Key key) throws IOException {
+    private KademliaDHT createDHTInstance(Key key) throws IOException {
+        KademliaConfig config = KademliaConfig.newBuilder().setTimeoutMs(6000).build();
+
         NodeInfo localKey = new NodeInfo(key);
-        ContactBucket bucket = new ContactBucket(localKey, 160, 3);
+        ContactBucket bucket = new ContactBucket(localKey, config);
         TimestampedStore<byte[]> timestampedStore = new InMemoryByteStore(KademliaDHT.defaultExpirationTime);
-        MessageDispacher server = new KademliaServer(0, bucket, service, timestampedStore);
+        MessageDispacher server = new TcpServer(config, bucket, service, timestampedStore);
         bucket.getLocalNode().setLanAddress(server.getUsedSocketAddress());
-        return new KademliaDHT(bucket, server, timestampedStore,KademliaConfig.newBuilder().build());
+        return new KademliaDHT(bucket, server, timestampedStore, KademliaConfig.newBuilder().build());
     }
 
     public KademliaDHTTest() throws Exception {
-        for (int i = 0; i < N_DHTS; i++) {
+        for (int i = 0; i < nDHTS; i++) {
 
             // kademlia id of i'th dht = valueof(i)
-            dhts.add(createDHTinstance(new Key(new BigInteger(hex(i + 1), 16).toByteArray())));
+            dhts.add(createDHTInstance(new Key(new BigInteger(hex(i + 1), 16).toByteArray())));
             dhts.get(i).server.start();
         }
         Thread.sleep(1000);

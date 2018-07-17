@@ -10,12 +10,18 @@ import java.net.InetSocketAddress;
  *
  * @author Grzegorz Milka
  */
-public class NodeInfo implements Serializable,Comparable{
+public class NodeInfo implements Serializable, Comparable {
     private static final long serialVersionUID = 1L;
 
     private final Key mKey;
     private InetSocketAddress mLanAddress;
     private InetSocketAddress mWanAddress;
+
+    public NodeInfo(NodeInfo nodeInfo) {
+        mKey = nodeInfo.mKey;
+        mLanAddress = nodeInfo.mLanAddress;
+        mWanAddress = nodeInfo.mWanAddress;
+    }
 
     public NodeInfo(Key key) {
         mKey = key;
@@ -37,7 +43,7 @@ public class NodeInfo implements Serializable,Comparable{
 
     @Override
     public boolean equals(Object obj) {
-        return compareTo(obj)==0;
+        return compareTo(obj) == 0;
     }
 
     public Key getKey() {
@@ -64,13 +70,14 @@ public class NodeInfo implements Serializable,Comparable{
 
     @Override
     public String toString() {
-        if(getKey()==null){
+        if (getKey() == null) {
             return "nullNodeInfo";
         }
         return getKey().toString();
 
     }
-    public String toDetailString(){
+
+    public String toDetailString() {
         return String.format("NodeInfo[key: %s, lan address: %s, wan address: %s]", mKey, mLanAddress, mWanAddress);
     }
 
@@ -81,28 +88,26 @@ public class NodeInfo implements Serializable,Comparable{
 
     @Override
     public int compareTo(Object o) {
-        if(getKey()!=null){
-            if(o instanceof NodeInfo)
+        if (getKey() != null) {
+            if (o instanceof NodeInfo)
                 return getKey().compareTo(((NodeInfo) o).getKey());
-            if(o instanceof Key)
+            if (o instanceof Key)
                 return getKey().compareTo(o);
         }
-        else{
-            if(o instanceof NodeInfo)
-                if(((NodeInfo) o).getKey()==null){
-                    return 0;
-                }
-                else{
-                    return -1;
-                }
-            if(o instanceof Key)
-                return 1;
-            if(o==null)
+
+        if (o instanceof NodeInfo)
+            if (((NodeInfo) o).getKey() == null) {
                 return 0;
-        }
-        throw new IllegalArgumentException("Type NodeInfo cannot be compared with "+o.getClass().getName());
+            } else {
+                return -1;
+            }
+        if (o instanceof Key)
+            return 1;
+
+        if (o == null)
+            return 0;
+        throw new IllegalArgumentException("Type NodeInfo cannot be compared with " + o.getClass().getName());
     }
-    public NodeInfo clone(){
-        return new NodeInfo( getKey(),getLanAddress(),getWanAddress());
-    }
+
+
 }

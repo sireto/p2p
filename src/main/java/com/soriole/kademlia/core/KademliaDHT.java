@@ -1,11 +1,10 @@
 package com.soriole.kademlia.core;
 
 import com.soriole.kademlia.core.messages.*;
+import com.soriole.kademlia.core.network.server.udp.UdpServer;
 import com.soriole.kademlia.core.store.*;
 import com.soriole.kademlia.core.util.NodeInfoComparatorByDistance;
 import com.soriole.kademlia.core.network.MessageDispacher;
-import com.soriole.kademlia.core.network.server.udp.KademliaServer;
-import com.soriole.kademlia.core.network.receivers.MessageReceiver;
 import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,9 +99,9 @@ public class KademliaDHT implements KadProtocol<byte[]> {
 
     public KademliaDHT(Key localKey, KademliaConfig config) throws SocketException {
 
-        this.bucket = new ContactBucket(new NodeInfo(localKey), config.getKeyLength(), config.getK());
+        this.bucket = new ContactBucket(new NodeInfo(localKey), config);
         timestampedStore = new InMemoryByteStore(config.getKeyValueExpiryTime());
-        this.server = new KademliaServer(config.getKadeliaProtocolPort(), bucket, timestampedStore);
+        this.server = new UdpServer(config, bucket, timestampedStore);
         bucket.getLocalNode().setLanAddress(server.getUsedSocketAddress());
     }
 
@@ -151,7 +150,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             }
         }
         putLocal(key, value);
-        return successes+1;
+        return successes + 1;
 
     }
 
@@ -321,8 +320,8 @@ public class KademliaDHT implements KadProtocol<byte[]> {
     }
 
     @Override
-    public void join(InetSocketAddress address) {
-        join(new NodeInfo(null, address));
+    public boolean join(InetSocketAddress address) {
+        return join(new NodeInfo(null, address));
     }
 
     public void shutDown(int timeSeconds) throws InterruptedException {
@@ -424,21 +423,18 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             }
         }
 
-        Thread udpPunctureThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    Collection<NodeInfo> routingTable = getRoutingTable();
-                    if (routingTable.size() > 0) {
-                        Random rnd = new Random();
-                        int i = rnd.nextInt(routingTable.size());
-                        ping(routingTable.toArray(new NodeInfo[0])[i]);
-                    }
-                    try {
-                        Thread.sleep(waitTiimeMs);
-                    } catch (InterruptedException e) {
-                        return;
-                    }
+        Thread udpPunctureThread = new Thread(() -> {
+            while (true) {
+                Collection<NodeInfo> routingTable = getRoutingTable();
+                if (routingTable.size() > 0) {
+                    Random rnd = new Random();
+                    int i = rnd.nextInt(routingTable.size());
+                    ping(routingTable.toArray(new NodeInfo[0])[i]);
+                }
+                try {
+                    Thread.sleep(waitTiimeMs);
+                } catch (InterruptedException e) {
+                    return;
                 }
             }
         });
@@ -451,6 +447,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         if (udpPunctureThread != null) {
             if (udpPunctureThread.isAlive()) {
                 udpPunctureThread.interrupt();
+                udpPunctureThread=null;
                 return true;
             }
         }
@@ -459,11 +456,11 @@ public class KademliaDHT implements KadProtocol<byte[]> {
 
     public NodeInfo findMyInfo(NodeInfo nodeInfo) throws TimeoutException {
         try {
-            Message message =  server.startQuery(nodeInfo, new EchoMessage());
-            if(message instanceof EchoReplyMessage){
+            Message message = server.startQuery(nodeInfo, new EchoMessage());
+            if (message instanceof EchoReplyMessage) {
                 return ((EchoReplyMessage) message).nodeInfo;
             }
-            LOGGER.warn("findMyNodeInfo() : Invalid type "+message.getClass()+" replied for EchoMessage");
+            LOGGER.warn("findMyNodeInfo() : Invalid type " + message.getClass() + " replied for EchoMessage");
             return null;
 
         } catch (ServerShutdownException e) {

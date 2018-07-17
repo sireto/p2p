@@ -19,7 +19,7 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 
 /**
- * KademliaServer is able to read the datagram received in a socket and convert them into
+ * TcpServer is able to read the datagram received in a socket and convert them into
  * appropriate message format so that the upper layer can handle it.
  * The tasks performed by this server are:
  *  <ol>
@@ -120,7 +120,7 @@ abstract class MessageServer extends DataGramServer {
                 // try to put it into the bucket
                 if (!bucket.putNode(message.mSrcNodeInfo)) {
                     // if we cannot put it into the bucket we need to notify for furthur action
-                    onNewNodeFound(message.mSrcNodeInfo.clone());
+                    onNewNodeFound(new NodeInfo(message.mSrcNodeInfo));
                 }
                 return message;
             }

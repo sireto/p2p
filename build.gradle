@@ -1,37 +1,26 @@
+apply plugin: 'java'
 apply plugin: 'idea'
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.3.RELEASE")
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.6'
-
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'com.google.protobuf'
-
-sourceSets {
-    main {
-        proto {
-        }
-    }
-}
-
-bootJar {
-    baseName = 'p2p-kademlia'
-    version = '2.0.0'
-    mainClassName = 'com.soriole.kademlia.KademliaApplication'
-}
 repositories {
     mavenCentral()
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+// the details about the project
+group = 'com.soriole'
+version = '2.0.0'
 
 dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.0.1.RELEASE'
@@ -54,14 +43,82 @@ dependencies {
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.1.RELEASE'
 }
 
+apply plugin: 'com.google.protobuf'
 protobuf {
     protoc {
         // Download from repositories
         artifact = 'com.google.protobuf:protoc:3.0.0'
     }
 }
-clean{
-    println "Trying to delete : ${rootDir}/biuld/"
-    delete("${rootDir}/build/")
 
+/**
+ * Task to create jarFile that can be used as dependency in another projects
+ *  and to install it to local maven repository
+ */
+
+task libraryJar(type: Jar) {
+    from(sourceSets.main.output) {
+        include "**"
+        exclude "*.proto"
+        exclude "*.properties"
+
+    }
 }
+
+/**
+ * Task to create standalone Spring application
+ */
+apply plugin: 'org.springframework.boot'
+bootJar {
+    baseName = rootProject.name + "-standalone"
+    version=null
+    mainClassName = 'com.soriole.kademlia.KademliaApplication'
+}
+
+apply plugin: 'maven-publish'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+apply plugin: "com.jfrog.artifactory"
+artifactory {
+    if (project.hasProperty('contextUrl') &&
+        project.hasProperty('artifactory_user') &&
+        project.hasProperty('artifactory_password'))
+    {
+        contextUrl = "${artifactory_contextUrl}"
+
+    }else{
+        logger.warn "Artifactory deployment is skipped due to missing user data."
+        logger.quiet "Please add user data to `gradle.properties` file if you want to publish changes."
+        return -1;
+
+    }
+    publish {
+
+        repository {
+            repoKey = 'release'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+        }
+        defaults {
+            publications('mavenJava')
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'libs-release'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+        }
+    }
+}
+artifactoryPublish { dependsOn libraryJar }
+
+

@@ -41,16 +41,16 @@ public class TcpPeerSocket {
     }
 
 
-    public Socket connect(InetSocketAddress address) throws IOException, TimeoutException {
+    public Socket connect(InetSocketAddress address,long timeoutMs) throws IOException, TimeoutException {
         Socket client = socketMap.get(address);
         if (client == null) {
-            return internalConnect(address);
+            return internalConnect(address,timeoutMs);
         }
         return client;
     }
 
 
-    private Socket internalConnect(InetSocketAddress address) throws IOException, TimeoutException {
+    private Socket internalConnect(InetSocketAddress address,long timeoutMs) throws IOException, TimeoutException {
         Socket client = new Socket();
         client.connect(address);
         SocketWatcher watcher =new SocketWatcher(client,messageReceiver);
@@ -59,7 +59,7 @@ public class TcpPeerSocket {
         Message message = new AddressExchangeMessage(serverSocket.getLocalPort());
         message.mSrcNodeInfo=bucket.getLocalNode();
         message.sessionId=new Random().nextLong();
-        message=watcher.query(message,20000);
+        message=watcher.query(message,timeoutMs);
         if(message instanceof PongMessage){
             newPeer(message.getSourceNodeInfo().getKey(),(InetSocketAddress) client.getRemoteSocketAddress(), (InetSocketAddress) client.getRemoteSocketAddress(),true);
             this.socketMap.put((InetSocketAddress) client.getRemoteSocketAddress(),client);
@@ -133,19 +133,19 @@ public class TcpPeerSocket {
         if(message.mSrcNodeInfo==null){
             message.mSrcNodeInfo=bucket.getLocalNode();
         }
-        return this.socketWatchers.get(connect(receiver.getLanAddress())).query(message,timeoutMs);
+        return this.socketWatchers.get(connect(receiver.getLanAddress(),timeoutMs)).query(message,timeoutMs);
     }
     public void sendMessage(InetSocketAddress address, Message message) throws IOException, IllegalArgumentException, TimeoutException {
         logger.debug("Sending message of type :` "+message.getClass().getSimpleName()+"` to  :"+address);
         if(message.mSrcNodeInfo==null){
             message.mSrcNodeInfo=bucket.getLocalNode();
         }
-        MessageFactory.toProtoInstance(message).writeDelimitedTo(this.connect(address).getOutputStream());
+        MessageFactory.toProtoInstance(message).writeDelimitedTo(this.connect(address,10000).getOutputStream());
     }
 
     public Message receiveMessage(InetSocketAddress address, Message message) throws NotYetConnectedException, IOException, InstantiationException, TimeoutException {
         if (this.socketMap.contains(address)) {
-            KademliaNetworkMessageProtocol.Message message1 = parseDelimitedFrom(connect(address).getInputStream());
+            KademliaNetworkMessageProtocol.Message message1 = parseDelimitedFrom(connect(address,0).getInputStream());
             return MessageFactory.createInstance(message1, address);
         }
         throw new NotYetConnectedException();

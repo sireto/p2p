@@ -3,19 +3,18 @@ package com.soriole.kademlia.core;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.NonKademliaMessage;
 import com.soriole.kademlia.core.messages.listeners.ByteListener;
-import com.soriole.kademlia.core.store.*;
 import com.soriole.kademlia.core.network.ExtendedMessageDispacher;
 import com.soriole.kademlia.core.network.ServerShutdownException;
-import com.soriole.kademlia.core.network.receivers.MessageReceiver;
 import com.soriole.kademlia.core.network.receivers.ByteReceiver;
-import com.soriole.kademlia.core.network.server.udp.KademliaServer;
+import com.soriole.kademlia.core.network.receivers.MessageReceiver;
+import com.soriole.kademlia.core.network.server.udp.UdpServer;
+import com.soriole.kademlia.core.store.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.NoSuchElementException;
-import java.util.SortedSet;
+import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 // ExtendedKademliaDHT enables us to send messages beyond the kademlia protocol messages.
@@ -29,19 +28,23 @@ public class KademliaExtendedDHT extends KademliaDHT {
 
     public KademliaExtendedDHT(Key localNodeKey, KademliaConfig config) throws SocketException {
         this(
-                new ContactBucket(new NodeInfo(localNodeKey), config.getKeyLength(), config.getK()),
+                new ContactBucket(new NodeInfo(localNodeKey), config),
                 new InMemoryByteStore(config.getKeyValueExpiryTime()),
                 config
         );
     }
 
+    public KademliaExtendedDHT(ContactBucket bucket, ExtendedMessageDispacher dispacher, TimestampedStore<byte[]> store, KademliaConfig config) {
+        super(bucket, dispacher, store, config);
+    }
+
     //constructor used to make above creation easy.
     public KademliaExtendedDHT(ContactBucket bucket, TimestampedStore<byte[]> store, KademliaConfig config) throws SocketException {
-        super(bucket, new KademliaServer(config.getKadeliaProtocolPort(), bucket, store), store, config);
+        super(bucket, new UdpServer(config, bucket, store), store, config);
     }
 
     public KademliaExtendedDHT(Key localNodeKey, TimestampedStore<byte[]> store, KademliaConfig config) throws SocketException {
-        this(new ContactBucket(new NodeInfo(localNodeKey), config.getKeyLength(), config.getK()), store, config);
+        this(new ContactBucket(new NodeInfo(localNodeKey), config), store, config);
 
     }
 
@@ -58,26 +61,47 @@ public class KademliaExtendedDHT extends KademliaDHT {
         server.sendMessage(toNode(key), msg);
     }
 
-    public byte[] queryWithNode(Key key, long sessionId, byte[] message) throws TimeoutException, NoSuchNodeFoundException, ServerShutdownException, IOException {
+    private byte[] queryWithNode(Key key, long sessionId, byte[] message, long timeoutMs) throws TimeoutException, NoSuchNodeFoundException, ServerShutdownException, IOException {
         NonKademliaMessage msg = new NonKademliaMessage();
         msg.sessionId = sessionId;
         msg.rawBytes = message;
-        NonKademliaMessage m = (NonKademliaMessage) server.startQuery(toNode(key), msg);
-        if (m == null) {
-            logger.warn("Received message Type not matched.");
+        Message m = server.startQuery(toNode(key), msg, timeoutMs);
+        if (m instanceof NonKademliaMessage) {
+            return ((NonKademliaMessage) m).rawBytes;
+        } else {
+            logger.warn(String.format("Expected NonKademliaMessage but received msg of type %s", m.getClass().getSimpleName()));
             throw new TimeoutException();
         }
-        return m.rawBytes;
     }
+
+    private byte[] queryWithNode(Key key, long sessionId, byte[] message) throws TimeoutException, NoSuchNodeFoundException, ServerShutdownException, IOException {
+        NonKademliaMessage msg = new NonKademliaMessage();
+        msg.sessionId = sessionId;
+        msg.rawBytes = message;
+        Message m = server.startQuery(toNode(key), msg);
+        if (m instanceof NonKademliaMessage) {
+            return ((NonKademliaMessage) m).rawBytes;
+        } else {
+            logger.warn(String.format("Expected NonKademliaMessage but received msg of type %s", m.getClass().getSimpleName()));
+            throw new TimeoutException();
+        }
+    }
+
 
     public byte[] queryWithNode(Key key, byte[] message) throws NoSuchNodeFoundException, ServerShutdownException, TimeoutException, IOException {
-        return queryWithNode(key, 0, message);
+        return queryWithNode(key, new Random().nextLong(), message);
     }
 
-    public void queryWithNodeAsync(Key key, byte[] message, ByteListener listener) throws NoSuchNodeFoundException, ServerShutdownException, TimeoutException {
-        NonKademliaMessage msg = new NonKademliaMessage();
-        msg.rawBytes = message;
-        server.startQueryAsync(toNode(key), msg, wrapReceiver(listener));
+    public byte[] queryWithNode(Key key, byte[] message, long timeoutMs) throws NoSuchNodeFoundException, ServerShutdownException, TimeoutException, IOException {
+        return queryWithNode(key, new Random().nextLong(), message, timeoutMs);
+    }
+
+    public void queryWithNodeAsync(Key key, byte[] message, ByteListener listener) throws NoSuchNodeFoundException, ServerShutdownException {
+        server.startQueryAsync(toNode(key), new NonKademliaMessage(message), wrapReceiver(listener));
+    }
+
+    public void queryWithNodeAsync(Key key, byte[] message, ByteListener listener, long timeoutMs) throws NoSuchNodeFoundException, ServerShutdownException {
+        server.startQueryAsync(toNode(key), new NonKademliaMessage(message), timeoutMs, wrapReceiver(listener));
     }
 
     public void setMessageReceiver(ByteReceiver receiver) {
@@ -85,20 +109,11 @@ public class KademliaExtendedDHT extends KademliaDHT {
     }
 
     private NodeInfo toNode(Key key) throws ServerShutdownException, NoSuchNodeFoundException {
-        NodeInfo info = bucket.getNode(key);
+        NodeInfo info = findNode(key);
         if (info == null) {
-            SortedSet<NodeInfo> nodes = this.findClosestNodes(key);
-            try {
-                if (nodes.first().getKey().equals(key)) {
-                    return nodes.first();
-                }
-            } catch (NoSuchElementException e) {
-                throw new NoSuchNodeFoundException();
-            }
-        } else {
-            return info;
+            throw new NoSuchNodeFoundException();
         }
-        throw new NoSuchNodeFoundException();
+        return info;
     }
 
     private static MessageReceiver wrapReceiver(final ByteListener listener) {
@@ -109,6 +124,7 @@ public class KademliaExtendedDHT extends KademliaDHT {
                     listener.onReceive(((NonKademliaMessage) message).rawBytes);
 
                 } else {
+                    logger.warn(String.format("Expected NonKademliaMessage reply but got response of :%s", message.getClass().getSimpleName()));
                     listener.onTimeout();
                 }
             }
