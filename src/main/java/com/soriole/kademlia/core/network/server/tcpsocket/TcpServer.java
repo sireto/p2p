@@ -4,6 +4,7 @@ import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.NodeInteractionListener;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.listeners.ListenerFactory;
+import com.soriole.kademlia.core.messages.listeners.MessageListener;
 import com.soriole.kademlia.core.network.MessageDispacher;
 import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.network.receivers.BulkMessageReceiver;
@@ -191,8 +192,14 @@ public class TcpServer implements MessageDispacher, MessageReceiver {
     public void onReceive(Message message) {
         try {
 
-            ListenerFactory.getListener(message, bucket, this, store).onReceive(message);
-
+            MessageListener listener = ListenerFactory.getListener(message, bucket, this, store);
+            service.submit(()-> {
+                try {
+                    listener.onReceive(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
 
         } catch (ListenerFactory.NoListenerException e) {
             logger.warn("Message of type `"+message.getClass().getSimpleName()+" dropped after receive!");

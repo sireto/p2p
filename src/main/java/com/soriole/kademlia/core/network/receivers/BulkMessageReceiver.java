@@ -25,9 +25,12 @@ public class BulkMessageReceiver implements MessageReceiver {
 
     @Override
     synchronized public void onReceive(Message message) {
-        receivedMessages.add(message);
-        if (--counter <= 0) {
+
+        if (--counter == 0) {
+            receivedMessages.add(message);
             notify();
+        } else if (counter < 0) {
+            logger.warn(Message.class.getSimpleName() + " Received after Timeout");
         }
 
     }

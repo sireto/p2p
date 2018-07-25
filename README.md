@@ -39,7 +39,7 @@ Blockchain p2p messaging
         }
     }
     dependencies{
-        compile(group: 'com.soriole', name: 'kademlia', version: '2.0.1')
+        compile(group: 'com.soriole', name: 'kademlia', version: '2.0.2')
     }
     
 ```

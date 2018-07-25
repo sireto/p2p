@@ -27,30 +27,28 @@ public class ExtendedTcpServer extends TcpServer implements ExtendedMessageDispa
     public void onReceive(Message message) {
         if (message instanceof NonKademliaMessage) {
             NonKademliaMessage msg = (NonKademliaMessage) message;
-            if (msg != null) {
-                if (msg.rawBytes.length > 0) {
-                    byte[] reply = this.messageReceiver.onNewMessage(msg.getSourceNodeInfo(), msg.rawBytes);
-                    if (reply != null) {
-                        if (reply.length > 0) {
-                            NonKademliaMessage replyMsg = new NonKademliaMessage();
-                            replyMsg.rawBytes = reply;
-                            try {
-                                this.replyFor(message, replyMsg);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } catch (TimeoutException e) {
-                                e.printStackTrace();
+            if (msg.rawBytes.length > 0) {
+                service.submit(() -> {
+
+                            byte[] reply = this.messageReceiver.onNewMessage(msg.getSourceNodeInfo(), msg.rawBytes);
+                            if (reply != null && reply.length > 0) {
+                                NonKademliaMessage replyMsg = new NonKademliaMessage();
+                                replyMsg.rawBytes = reply;
+                                try {
+                                    this.replyFor(message, replyMsg);
+                                } catch (IOException | TimeoutException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                            return;
                         }
-                    }
-                    return;
-                }
-            } else {
+                );
+            }
+            else {
                 logger.warn("Received blank instance of NonKademliaMessage from " + msg.getSourceNodeInfo());
             }
+        }else {
+            super.onReceive(message);
         }
-        super.onReceive(message);
     }
 
     @Override

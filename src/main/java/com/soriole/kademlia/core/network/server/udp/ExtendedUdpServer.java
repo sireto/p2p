@@ -38,21 +38,23 @@ public class ExtendedUdpServer extends UdpServer implements ExtendedMessageDispa
     @Override
     protected void OnNewMessage(final Message message) {
         if (message instanceof NonKademliaMessage) {
-            byte[] msg = receiver.onNewMessage(message.mSrcNodeInfo, ((NonKademliaMessage) message).rawBytes);
-            if (msg != null) {
-                if (msg.length > 0) {
-                    Message reply = new NonKademliaMessage();
-                    ((NonKademliaMessage) reply).rawBytes = msg;
-                    try {
-                        this.replyFor(message, reply);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+            workerPool.submit(()-> {
+                byte[] msg = receiver.onNewMessage(message.mSrcNodeInfo, ((NonKademliaMessage) message).rawBytes);
+                if (msg != null) {
+                    if (msg.length > 0) {
+                        Message reply = new NonKademliaMessage();
+                        ((NonKademliaMessage) reply).rawBytes = msg;
+                        try {
+                            this.replyFor(message, reply);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
-            return;
+            });
+        }else {
+            super.OnNewMessage(message);
         }
-        super.OnNewMessage(message);
     }
 
     public void setNonKademliaMessageReceiver(ByteReceiver receiver) {

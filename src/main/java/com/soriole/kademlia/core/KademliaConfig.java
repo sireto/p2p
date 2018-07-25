@@ -87,7 +87,7 @@ public class KademliaConfig {
     public static class Builder {
         int k = 2;
         int alpha = 3;
-        int timeout = 3000;
+        int timeout = 3 *1000;
         int nWorkers = 30;
         int keyLength = 160;
         int nodeAutoPingTime = 30 * 1000;
