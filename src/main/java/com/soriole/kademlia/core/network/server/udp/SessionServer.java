@@ -2,11 +2,11 @@ package com.soriole.kademlia.core.network.server.udp;
 
 import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.messages.Message;
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.core.util.BlockingHashTable2;
 import com.soriole.kademlia.core.util.BlockingHashTable4;
-import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +94,9 @@ abstract class SessionServer extends MessageServer {
     }
 
     synchronized protected void stopListening() {
-        this.socket.close();
+        if (!this.socket.isClosed()) {
+            this.socket.close();
+        }
         listening = false;
     }
 

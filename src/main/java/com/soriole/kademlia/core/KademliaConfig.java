@@ -90,9 +90,9 @@ public class KademliaConfig {
         int timeout = 3000;
         int nWorkers = 30;
         int keyLength = 160;
-        int nodeAutoPingTime = 30;
-        int keyValueRefreshTime = 60 * 60;
-        int keyValueExpiryTime = 24 * 60 * 60;
+        int nodeAutoPingTime = 30 * 1000;
+        int keyValueRefreshTime = 60 * 60 * 1000;
+        int keyValueExpiryTime = 24 * 60 * 60 * 1000;
         int kadeliaProtocolPort = 0;
         int httpPort = 80;
 

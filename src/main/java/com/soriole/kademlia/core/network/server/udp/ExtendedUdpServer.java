@@ -3,16 +3,17 @@ package com.soriole.kademlia.core.network.server.udp;
 import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.NonKademliaMessage;
+import com.soriole.kademlia.core.network.ExtendedMessageDispacher;
+import com.soriole.kademlia.core.network.receivers.ByteReceiver;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.core.store.TimestampedStore;
-import com.soriole.kademlia.core.network.receivers.ByteReceiver;
-import com.soriole.kademlia.core.network.ExtendedMessageDispacher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Extended kademlia Message server enables us to Send and receive
@@ -28,6 +29,10 @@ public class ExtendedUdpServer extends UdpServer implements ExtendedMessageDispa
 
     public ExtendedUdpServer(KademliaConfig config, ContactBucket bucket, TimestampedStore store) throws SocketException {
         super(config, bucket, store);
+    }
+
+    public ExtendedUdpServer(KademliaConfig config, ContactBucket bucket, ExecutorService service, TimestampedStore store) throws SocketException {
+        super(config, bucket, service, store);
     }
 
     @Override
@@ -58,7 +63,7 @@ public class ExtendedUdpServer extends UdpServer implements ExtendedMessageDispa
         return new ByteReceiver() {
             @Override
             public byte[] onNewMessage(NodeInfo key, byte[] message) {
-                logger.info("NonKademlia Message from " + key + " dropped by default!");
+                logger.warn("NonKademlia Message from " + key + " dropped by default!");
                 return null;
             }
         };

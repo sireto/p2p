@@ -12,30 +12,30 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
 
-public class ExtendedTCPServer extends TcpServer implements ExtendedMessageDispacher {
-    ByteReceiver messageReceiver= (key, message) -> null;
+public class ExtendedTcpServer extends TcpServer implements ExtendedMessageDispacher {
+    ByteReceiver messageReceiver = (key, message) -> null;
 
-    public ExtendedTCPServer(KademliaConfig config, ContactBucket bucket, TimestampedStore store) throws IOException {
+    public ExtendedTcpServer(KademliaConfig config, ContactBucket bucket, TimestampedStore store) throws IOException {
         super(config, bucket, store);
     }
 
-    public ExtendedTCPServer(KademliaConfig config, ContactBucket bucket, ExecutorService service, TimestampedStore store) throws IOException {
-        super(config,bucket,service,store);
+    public ExtendedTcpServer(KademliaConfig config, ContactBucket bucket, ExecutorService service, TimestampedStore store) throws IOException {
+        super(config, bucket, service, store);
     }
 
     @Override
     public void onReceive(Message message) {
-        if(message instanceof NonKademliaMessage){
-            NonKademliaMessage msg= (NonKademliaMessage) message;
-            if(msg!=null){
-                if(msg.rawBytes.length>0){
-                    byte[] reply=this.messageReceiver.onNewMessage(msg.getSourceNodeInfo(),msg.rawBytes);
-                    if(reply!=null){
-                        if(reply.length>0){
-                            NonKademliaMessage replyMsg=new NonKademliaMessage();
-                            replyMsg.rawBytes=reply;
+        if (message instanceof NonKademliaMessage) {
+            NonKademliaMessage msg = (NonKademliaMessage) message;
+            if (msg != null) {
+                if (msg.rawBytes.length > 0) {
+                    byte[] reply = this.messageReceiver.onNewMessage(msg.getSourceNodeInfo(), msg.rawBytes);
+                    if (reply != null) {
+                        if (reply.length > 0) {
+                            NonKademliaMessage replyMsg = new NonKademliaMessage();
+                            replyMsg.rawBytes = reply;
                             try {
-                                this.replyFor(message,replyMsg);
+                                this.replyFor(message, replyMsg);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             } catch (TimeoutException e) {
@@ -46,8 +46,7 @@ public class ExtendedTCPServer extends TcpServer implements ExtendedMessageDispa
                     }
                     return;
                 }
-            }
-            else {
+            } else {
                 logger.warn("Received blank instance of NonKademliaMessage from " + msg.getSourceNodeInfo());
             }
         }
@@ -56,6 +55,6 @@ public class ExtendedTCPServer extends TcpServer implements ExtendedMessageDispa
 
     @Override
     public void setNonKademliaMessageReceiver(ByteReceiver receiver) {
-        this.messageReceiver=receiver;
+        this.messageReceiver = receiver;
     }
 }

@@ -3,11 +3,11 @@ package com.soriole.kademlia.core.network.server.udp;
 import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.NodeLookupMessage;
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.InMemoryByteStore;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -36,7 +34,7 @@ public class UdpServerTest extends UdpServer {
     }
 
     public UdpServerTest() throws SocketException {
-        super(KademliaConfig.newBuilder().build(),
+        super(KademliaConfig.newBuilder().setnWorkers(5).build(),
                 new ContactBucket(new NodeInfo(Key.gemerateNew()), KademliaConfig.newBuilder().build()),
                 new InMemoryByteStore(KademliaConfig.newBuilder().build()));
 
@@ -65,11 +63,6 @@ public class UdpServerTest extends UdpServer {
         UdpServer server = new UdpServerTest();
         assert(server.start());
 
-        // try stopping and restarting both servers;
-        assert(this.stop());
-        assert(server.stop());
-        assert(this.start());
-        assert(server.start());
 
         Key k1=randomkey();
         // query the server for the message and get a loopback reply.
@@ -82,9 +75,7 @@ public class UdpServerTest extends UdpServer {
         // check that the replied message is same as the original message.
         NodeLookupMessage reply = (NodeLookupMessage) mReply;
         assert (reply.lookupKey.equals(k1));
-
-        server.stop();
-        this.stop();
+        Thread.currentThread().setName("Test Thread");
         // nothing went wrong. thus the serialization, the session and message type mapping also is working fine.
 
     }

@@ -1,11 +1,11 @@
 package com.soriole.kademlia.core;
 
 import com.soriole.kademlia.core.messages.*;
+import com.soriole.kademlia.core.network.MessageDispacher;
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.network.server.udp.UdpServer;
 import com.soriole.kademlia.core.store.*;
 import com.soriole.kademlia.core.util.NodeInfoComparatorByDistance;
-import com.soriole.kademlia.core.network.MessageDispacher;
-import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +20,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
     protected final ContactBucket bucket;
     protected final MessageDispacher server;
     // TimestampedStore with 24 hours expiration time.
-    static final long defaultExpirationTime = 1000 * 60 * 60;
-    static final long defaultNodeExpirationTime = 1000 * 35;
+    private KademliaConfig config;
     private Thread bucketValidationThread;
     private Thread udpPunctureThread;
     final TimestampedStore<byte[]> timestampedStore;
@@ -32,6 +31,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         this.timestampedStore = store;
         // ensure that theat the local SocketAddress is properly set.
         this.bucket.getLocalNode().setLanAddress(server.getUsedSocketAddress());
+        this.config = config;
     }
 
     /**
@@ -136,7 +136,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         Collection<NodeInfo> nodes = internalFindClosestNodes(key, redundancy)[0];
         LOGGER.debug("Store(" + key + ") storing in these nodes :" + nodes);
         DataMessage message = new DataMessage();
-        message.expirationTime = new Date().getTime() + defaultExpirationTime;
+        message.expirationTime = new Date().getTime() + config.getKeyValueExpiryTime();
         message.key = key;
         message.value = value;
         int successes = 0;
@@ -340,11 +340,13 @@ public class KademliaDHT implements KadProtocol<byte[]> {
 
     public boolean start() throws SocketException {
         if (this.server.start()) {
+
             this.bucketValidationThread = new Thread(() -> {
                 while (true) {
                     try {
+                        LOGGER.debug("Started Contact Bucket Refresh Thread");
                         validateRoutingTable();
-                        Thread.sleep(defaultNodeExpirationTime);
+                        Thread.sleep(config.getNodeAutoPingTime());
                     } catch (InterruptedException e) {
                         return;
                     }
@@ -363,7 +365,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             Contact c = this.bucket.getMostInactiveContact();
             long currentTime = System.currentTimeMillis();
             if (c != null) {
-                if ((currentTime - c.getLastActive().getTime()) > this.defaultNodeExpirationTime) {
+                if ((currentTime - c.getLastActive().getTime()) > config.getNodeAutoPingTime()) {
                     for (int i = 0; i < 4; i++) {
                         if (this.ping(c.getNodeInfo()) >= 0) {
                             continue outerWhile;

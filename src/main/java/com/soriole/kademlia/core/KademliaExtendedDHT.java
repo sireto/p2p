@@ -7,7 +7,7 @@ import com.soriole.kademlia.core.network.ExtendedMessageDispacher;
 import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.network.receivers.ByteReceiver;
 import com.soriole.kademlia.core.network.receivers.MessageReceiver;
-import com.soriole.kademlia.core.network.server.udp.UdpServer;
+import com.soriole.kademlia.core.network.server.udp.ExtendedUdpServer;
 import com.soriole.kademlia.core.store.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ public class KademliaExtendedDHT extends KademliaDHT {
 
     //constructor used to make above creation easy.
     public KademliaExtendedDHT(ContactBucket bucket, TimestampedStore<byte[]> store, KademliaConfig config) throws SocketException {
-        super(bucket, new UdpServer(config, bucket, store), store, config);
+        super(bucket, new ExtendedUdpServer(config, bucket, store), store, config);
     }
 
     public KademliaExtendedDHT(Key localNodeKey, TimestampedStore<byte[]> store, KademliaConfig config) throws SocketException {

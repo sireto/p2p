@@ -1,14 +1,13 @@
 package com.soriole.kademlia.core.network.server.udp;
 
 import com.google.protobuf.ByteString;
-
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.MessageFactory;
 import com.soriole.kademlia.core.messages.MessageType;
+import com.soriole.kademlia.core.network.KademliaNetworkMessageProtocol;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.network.KademliaNetworkMessageProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +44,7 @@ abstract class MessageServer extends DataGramServer {
             logger.warn("Coding Error ! The server is trying to send message to itself!");
             return;
         }
+        logger.debug(String.format("sendMessage : %s -> %s", message.getClass().getSimpleName(), receiver.toDetailString()));
         if (message.mSrcNodeInfo == null) {
             message.mSrcNodeInfo = bucket.getLocalNode();
         }
@@ -78,7 +78,7 @@ abstract class MessageServer extends DataGramServer {
         try {
             message = MessageFactory.createUninitialized(messageProto.getType());
         } catch (Exception e) {
-            logger.warn("MessageFactory.createMessageInstance failed for type " + String.valueOf(messageProto.getType()));
+            throw new IOException("MessageFactory.createMessageInstance failed for type " + String.valueOf(messageProto.getType()));
         }
 
         // get The sender's identifier key
@@ -132,6 +132,7 @@ abstract class MessageServer extends DataGramServer {
             }
             bucket.putNode(message.mSrcNodeInfo);
         }
+        logger.debug(String.format("Received Message : %s <-- %s", message.getClass().getSimpleName(), message.getSourceNodeInfo().toDetailString()));
         return message;
 
     }

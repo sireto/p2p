@@ -1,8 +1,6 @@
 package com.soriole.kademlia.core.store;
 
 import java.io.Serializable;
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 /**
@@ -78,7 +76,7 @@ public class NodeInfo implements Serializable, Comparable {
     }
 
     public String toDetailString() {
-        return String.format("NodeInfo[key: %s, lan address: %s, wan address: %s]", mKey, mLanAddress, mWanAddress);
+        return String.format("[key: %s, lan address: %s, wan address: %s]", mKey, mLanAddress, mWanAddress);
     }
 
     public void setLanAddress(InetSocketAddress mLanAddress) {
