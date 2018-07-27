@@ -23,6 +23,9 @@ public class BlockingHashTable4<Type1, Type2> {
     }
 
     public Type2 get(Type1 key) throws TimeoutException {
+        return this.get(key,waitTime);
+    }
+    public Type2 get(Type1 key,long timeoutMs) throws TimeoutException {
         Object o = new Object();
 
         //lock and check if we already have the key.
@@ -36,7 +39,7 @@ public class BlockingHashTable4<Type1, Type2> {
         ioLock.unlock();
         // Oops, we don't have the key, so wait until somebody put it.
         synchronized (o) {
-            long newTime = waitTime;
+            long newTime = timeoutMs;
             long startTime = new Date().getTime();
             while (newTime > 0) {
                 try {
@@ -80,6 +83,7 @@ public class BlockingHashTable4<Type1, Type2> {
         ioLock.unlock();
         return returnValue;
     }
+
 
 
     public boolean putIfGetterWaiting(Type1 key, Type2 value) {

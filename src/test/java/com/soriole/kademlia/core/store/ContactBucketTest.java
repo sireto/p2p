@@ -1,5 +1,6 @@
 package com.soriole.kademlia.core.store;
 
+import com.soriole.kademlia.core.KademliaConfig;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -12,9 +13,9 @@ import static org.junit.Assert.assertEquals;
 
 public class ContactBucketTest {
 
-    NodeInfo localNode=new NodeInfo(new Key("FFFFF00000"));
-
-    ContactBucket bucket=new ContactBucket(localNode,160,3);
+    NodeInfo localNode=new NodeInfo(new Key("1VtAz7pj"));
+    KademliaConfig config=KademliaConfig.newBuilder().setK(3).build();
+    ContactBucket bucket=new ContactBucket(localNode,config);
     // helper function to generate another random key at given distance from known key.
     private Key randomKey(){
         byte[] bytes=new byte[Key.KEY_LENGTH/8];
@@ -42,10 +43,10 @@ public class ContactBucketTest {
     @Test
     public void putInOrder() throws InterruptedException {
 
-        NodeInfo n1=new NodeInfo(new Key("FFFFFF0000"));
-        NodeInfo n2=new NodeInfo(new Key("FFFFFF1234"));
-        NodeInfo n3=new NodeInfo(new Key("FFFFFFabcd"));
-        NodeInfo n4=new NodeInfo(new Key("FFFFFF3453"));
+        NodeInfo n1=new NodeInfo(new Key("1VtB5A3h"));
+        NodeInfo n2=new NodeInfo(new Key("1VtB5BS3"));
+        NodeInfo n3=new NodeInfo(new Key("1VtB5P7z"));
+        NodeInfo n4=new NodeInfo(new Key("1VtB5E2e"));
 
         //put three nodes atleast with a millisecond gap.
         bucket.putNode(n1);
@@ -83,9 +84,9 @@ public class ContactBucketTest {
     @Test
     public void testGetClosestNodes() throws Exception {
        ArrayList<NodeInfo> nodes=new ArrayList<>(3);
-        NodeInfo n1=new NodeInfo(new Key("ffff"));
-        NodeInfo n2=new NodeInfo(new Key("fffe"));
-        NodeInfo n3=new NodeInfo(new Key("fffd"));
+        NodeInfo n1=new NodeInfo(new Key("1LUv"));
+        NodeInfo n2=new NodeInfo(new Key("1LUu"));
+        NodeInfo n3=new NodeInfo(new Key("1LUt"));
         nodes.add(n1);
         nodes.add(n2);
         nodes.add(n3);

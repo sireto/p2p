@@ -69,5 +69,9 @@ public class TimeStampedData<Type> {
         }
         return false;
     }
+    @Override
+    public int hashCode(){
+        return this.getData().hashCode();
+    }
 
 }

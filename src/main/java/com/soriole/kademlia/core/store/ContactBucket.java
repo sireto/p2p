@@ -1,8 +1,7 @@
 package com.soriole.kademlia.core.store;
 
+import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.util.BoundedSortedSet;
-import com.soriole.kademlia.core.util.KeyComparatorByBucketPosition;
-import com.soriole.kademlia.core.util.NodeInfoComparatorByBucketPosition;
 import com.soriole.kademlia.core.util.NodeInfoComparatorByDistance;
 
 import java.util.*;
@@ -13,6 +12,7 @@ import java.util.*;
 public class ContactBucket {
 
     SortedSet<Contact>[] buckets;
+    SortedSet<Contact> contactsByLastSeen=new TreeSet<>(Contact.getComparatorByLastActive());
 
     // may be required.
     int contactCount;
@@ -20,7 +20,7 @@ public class ContactBucket {
     public final int k;
     private NodeInfo localNode;
 
-    public ContactBucket(NodeInfo localNode, int bitLength, int k) {
+    private ContactBucket(NodeInfo localNode, int bitLength, int k) {
         this.localNode = localNode;
         this.k = k;
         buckets = new SortedSet[bitLength];
@@ -29,6 +29,10 @@ public class ContactBucket {
         }
     }
 
+    public ContactBucket(NodeInfo localNode,KademliaConfig config){
+        this(localNode,config.getKeyLength(),config.getK());
+
+    }
     synchronized public NodeInfo getNode(Key key) {
         int distance = key.getBucketPosition(localNode.getKey());
         if(distance<0){
@@ -61,18 +65,23 @@ public class ContactBucket {
         if (buckets[distance].contains(new Contact(info))) {
             Contact contact = null;
             for (Contact c : buckets[distance]) {
-                if (c.equals(info))
-                    contact=c;
+                if (c.equals(info)) {
+                    contact = c;
                     break;
+                }
+
             }
             assert(contact!=null);
+            contactsByLastSeen.remove(contact);
             contact.lastActive = new Date();
+            contactsByLastSeen.add(contact);
             return true;
         } else if (buckets[distance].size() == k) {
             return false;
         } else {
             Contact c = new Contact(info);
             buckets[distance].add(c);
+            contactsByLastSeen.add(c);
             return true;
         }
     }
@@ -84,14 +93,16 @@ public class ContactBucket {
         if (buckets[distance].contains(new Contact(info))) {
             Contact contact = null;
             for (Contact c : buckets[distance]) {
-                if (c.equals(info))
-                    contact=c;
-                break;
+                if (c.equals(info)) {
+                    contact = c;
+                    break;
+                }
             }
             assert(contact!=null);
             contact.lastActive = new Date();
         } else if (buckets[distance].size() == k) {
-            SortedSet set=new TreeSet<Contact>(ContactComparatorByLastActive.getDefaultInstance());
+            //Todo: find some other roundAboutWay
+            SortedSet set=new TreeSet<Contact>(Contact.getComparatorByLastActive());
             set.addAll(buckets[distance]);
             buckets[distance].remove(set.first());
             buckets[distance].add(new Contact(info));
@@ -117,7 +128,7 @@ public class ContactBucket {
             contact.lastActive = new Date();
             return null;
         } else if (buckets[distance].size() == k) {
-            SortedSet set=new TreeSet<Contact>(ContactComparatorByLastActive.getDefaultInstance());
+            SortedSet set=new TreeSet<Contact>(Contact.getComparatorByLastActive());
             set.addAll(buckets[distance]);
             return ((Contact)set.first()).info;
 
@@ -133,6 +144,7 @@ public class ContactBucket {
         if(distance<0){
             return false;
         }
+        contactsByLastSeen.remove(getContact(key));
         return buckets[distance].remove(new Contact(new NodeInfo(key)));
     }
 
@@ -144,7 +156,7 @@ public class ContactBucket {
      */
     synchronized public BoundedSortedSet<NodeInfo> getClosestNodes(Key key, int count) {
 
-        BoundedSortedSet_NodeInfo closestNodes = new BoundedSortedSet_NodeInfo(count+1, key);
+        BoundedNodeInfoSet closestNodes = new BoundedNodeInfoSet(count+1, key);
 
         int pos = getLocalNode().getKey().getBucketPosition(key);
         if(pos<0){
@@ -182,7 +194,12 @@ public class ContactBucket {
     public BoundedSortedSet<NodeInfo> getClosestNodes(Key key) {
         return getClosestNodes(key, k);
     }
+    synchronized public void clearAll(){
+        for(int i=0;i<this.buckets.length;i++){
+            this.buckets[i].clear();
+        }
 
+    }
 
     synchronized public Collection<NodeInfo> getAllNodes() {
         ArrayList<NodeInfo> allNode = new ArrayList<>(20);
@@ -205,94 +222,26 @@ public class ContactBucket {
         }
         return ret;
     }
-
+    synchronized public Contact getMostInactiveContact(){
+        return this.contactsByLastSeen.first();
+    }
     @Override
     public String toString(){
         return getAllNodes().toString();
     }
-}
+    private static final class BoundedNodeInfoSet extends BoundedSortedSet<NodeInfo> {
 
-class Contact implements Comparable{
-    // node data
-    NodeInfo info;
+        public BoundedNodeInfoSet(int upperBound, Key k) {
+            super(upperBound, new NodeInfoComparatorByDistance(new NodeInfo(k)));
+        }
 
-    // the last time we contacted with this node.
-    Date lastActive;
-
-    // the first time we saw this node.
-    Date firstSeen;
-
-    public Contact() {
-    }
-
-    public Contact(NodeInfo info) {
-        this.info = info;
-        this.firstSeen = new Date();
-        this.lastActive = firstSeen;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return compareTo(o)==0;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        if(o instanceof Contact)
-            return info.compareTo(((Contact) o).info);
-        if(o instanceof NodeInfo)
-            return info.compareTo(o);
-        if (o instanceof Key)
-            return info.getKey().compareTo(o);
-        throw new IllegalArgumentException("Type Contact cannot be compared with "+o.getClass().getName());
-    }
-}
-
-class ContactComparatorByBucketPosition implements Comparator<Contact> {
-
-    KeyComparatorByBucketPosition comparator;
-    public ContactComparatorByBucketPosition(KeyComparatorByBucketPosition comparator){
-        this.comparator=comparator;
-    }
-    @Override
-    public int compare(Contact o1, Contact o2) {
-        return comparator.compare(o1.info.getKey(),o2.info.getKey());
-    }
-}
-
-class ContactComparatorByFirstSeen implements Comparator<Contact>{
-    private static ContactComparatorByFirstSeen comparator;
-    @Override
-    public int compare(Contact o1, Contact o2) {
-        return o1.firstSeen.compareTo(o2.firstSeen);
-    }
-    public static ContactComparatorByFirstSeen getDefaultInstance(){
-        return comparator;
-    }
-
-}
-
-class ContactComparatorByLastActive implements Comparator<Contact>{
-    private static ContactComparatorByLastActive comparator;
-    @Override
-    public int compare(Contact o1, Contact o2) {
-        return o1.lastActive.compareTo(o2.lastActive);
-    }
-    public static ContactComparatorByLastActive getDefaultInstance(){
-        return comparator;
-    }
-
-}
-
-class BoundedSortedSet_NodeInfo extends BoundedSortedSet<NodeInfo> {
-
-    public BoundedSortedSet_NodeInfo(int upperBound, Key k) {
-        super(upperBound, new NodeInfoComparatorByDistance(new NodeInfo(k)));
-    }
-
-    void addAllContacts(Collection<Contact> cc) {
-        for (Contact c : cc) {
-            add(c.info);
+        void addAllContacts(Collection<Contact> cc) {
+            for (Contact c : cc) {
+                add(c.info);
+            }
         }
     }
 }
+
+
+

@@ -1,11 +1,8 @@
 package com.soriole.kademlia.core.util;
 
 
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -13,7 +10,6 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @param <Type1> type of key
  * @param <Type2> type of value
- *
  * @author github.com/mesudip
  */
 public class BlockingHashTable<Type1, Type2> {
@@ -43,6 +39,7 @@ public class BlockingHashTable<Type1, Type2> {
         try {
             Thread.sleep(waitTime);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             // we got interrupted but it's things are same  wether we were interrupted or timeout occured.
         }
         ioLock.lock();

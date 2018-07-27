@@ -8,4 +8,10 @@ package com.soriole.kademlia.core.messages;
  */
 @MessageType(type = 10)
 public class NonKademliaMessage extends RawMessage{
+    public NonKademliaMessage(){
+
+    }
+    public NonKademliaMessage(byte[] message){
+        this.rawBytes=message;
+    }
 }

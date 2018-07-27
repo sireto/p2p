@@ -46,7 +46,7 @@ public class KademliaConfig {
         return alpha;
     }
 
-    public int getTimeout() {
+    public int getConnectionTimeout() {
         return timeout;
     }
 
@@ -73,30 +73,34 @@ public class KademliaConfig {
     public int getKadeliaProtocolPort() {
         return kadeliaProtocolPort;
     }
-    public static KademliaConfig getDefaultConfig(){
+
+    public static KademliaConfig getDefaultConfig() {
         return new Builder().build();
     }
-    public static Builder newBuilder(){
+
+    public static Builder newBuilder() {
         return new Builder();
     }
 
     // since the kademlia config is a read only class,
     // We use a builder to create a KademliaConfig instance.
-    public static class Builder{
-        int k=2;
-        int alpha=3;
-        int timeout=3;
-        int nWorkers=10;
-        int keyLength=160;
-        int nodeAutoPingTime=30;
-        int keyValueRefreshTime=60*60;
-        int keyValueExpiryTime=24*60*60;
-        int kadeliaProtocolPort=0;
-        int httpPort=80;
-        Builder(){}
+    public static class Builder {
+        int k = 2;
+        int alpha = 3;
+        int timeout = 3 *1000;
+        int nWorkers = 30;
+        int keyLength = 160;
+        int nodeAutoPingTime = 30 * 1000;
+        int keyValueRefreshTime = 60 * 60 * 1000;
+        int keyValueExpiryTime = 24 * 60 * 60 * 1000;
+        int kadeliaProtocolPort = 0;
+        int httpPort = 80;
 
-        public KademliaConfig build(){
-            return new KademliaConfig(){
+        Builder() {
+        }
+
+        public KademliaConfig build() {
+            return new KademliaConfig() {
                 {
                     super.k = Builder.this.k;
                     super.alpha = Builder.this.alpha;
@@ -111,44 +115,55 @@ public class KademliaConfig {
                 }
             };
         }
-        public void setK(int k) {
+
+        public Builder setK(int k) {
             this.k = k;
+            return this;
         }
 
-        public void setAlpha(int alpha) {
+        public Builder setAlpha(int alpha) {
             this.alpha = alpha;
+            return this;
         }
 
-        public void setTimeout(int timeout) {
-            this.timeout = timeout;
+        public Builder setTimeoutMs(int timeoutMs) {
+            this.timeout = timeoutMs;
+            return this;
         }
 
-        public void setnWorkers(int nWorkers) {
+        public Builder setnWorkers(int nWorkers) {
             this.nWorkers = nWorkers;
+            return this;
         }
 
-        public void setKeyLength(int keyLength) {
+        public Builder setKeyLength(int keyLength) {
             this.keyLength = keyLength;
+            return this;
         }
 
-        public void setNodeAutoPingTime(int nodeAutoPingTime) {
+        public Builder setNodeAutoPingTime(int nodeAutoPingTime) {
             this.nodeAutoPingTime = nodeAutoPingTime;
+            return this;
         }
 
-        public void setKeyValueRefreshTime(int keyValueRefreshTime) {
+        public Builder setKeyValueRefreshTime(int keyValueRefreshTime) {
             this.keyValueRefreshTime = keyValueRefreshTime;
+            return this;
         }
 
-        public void setKeyValueExpiryTime(int keyValueExpiryTime) {
+        public Builder setKeyValueExpiryTime(int keyValueExpiryTime) {
             this.keyValueExpiryTime = keyValueExpiryTime;
+            return this;
         }
 
-        public void setKadeliaProtocolPort(int kadeliaProtocolPort) {
+        public Builder setKadeliaProtocolPort(int kadeliaProtocolPort) {
             this.kadeliaProtocolPort = kadeliaProtocolPort;
+            return this;
         }
 
-        public void setHttpPort(int httpPort) {
+        public Builder setHttpPort(int httpPort) {
             this.httpPort = httpPort;
+            return this;
         }
     }
 }
